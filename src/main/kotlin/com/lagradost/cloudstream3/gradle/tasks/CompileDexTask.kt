@@ -69,8 +69,9 @@ abstract class CompileDexTask : DefaultTask() {
                     val files = classesInput.collect(Collectors.toList())
 
                     dexBuilder.convert(
-                        files.stream(),
-                        dexOutputDir.toPath()
+                        input = files.stream(),
+                        globalSyntheticsOutput = null,
+                        dexOutput = dexOutputDir.toPath()
                     )
 
                     for (file in files) {
