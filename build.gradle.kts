@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.7.10"
+    kotlin("jvm") version "1.9.0"
     id("java-gradle-plugin")
     id("maven-publish")
 }
@@ -21,12 +21,12 @@ dependencies {
     implementation(kotlin("stdlib", kotlin.coreLibrariesVersion))
     compileOnly(gradleApi())
 
-    compileOnly("com.google.guava:guava:30.1.1-jre")
-    compileOnly("com.android.tools:sdk-common:30.0.0")
-    compileOnly("com.android.tools.build:gradle:7.2.2")
-    compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.10")
-    
-    implementation("org.ow2.asm:asm:9.4")
+    compileOnly("com.google.guava:guava:33.2.1-jre")
+    compileOnly("com.android.tools:sdk-common:31.7.3")
+    compileOnly("com.android.tools.build:gradle:8.7.3")
+    compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.0")
+
+    implementation("org.ow2.asm:asm:9.6")
     implementation("org.ow2.asm:asm-tree:9.4")
     implementation("com.github.vidstige:jadb:master-SNAPSHOT")
 }
