@@ -50,7 +50,8 @@ abstract class CompileDexTask : DefaultTask() {
                     withDesugaring = minSdk >= 24,
                     desugarBootclasspath = ClassFileProviderFactory(android.bootClasspath.map(File::toPath))
                         .also { closer.register(it) },
-                    desugarClasspath = ClassFileProviderFactory(listOf<Path>()).also { closer.register(it) },
+                    desugarClasspath = ClassFileProviderFactory(mutableListOf())
+                        .also { closer.register(it) },
                     coreLibDesugarConfig = null,
                     enableApiModeling = false,
                     messageReceiver = MessageReceiverImpl(
