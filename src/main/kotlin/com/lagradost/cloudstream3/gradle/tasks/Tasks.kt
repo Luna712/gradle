@@ -1,7 +1,6 @@
 package com.lagradost.cloudstream3.gradle.tasks
 
 import com.lagradost.cloudstream3.gradle.getCloudstream
-import com.lagradost.cloudstream3.gradle.entities.PluginManifest
 import com.lagradost.cloudstream3.gradle.makeManifest
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.tasks.ProcessLibraryManifest
@@ -12,7 +11,6 @@ import org.gradle.api.tasks.AbstractCopyTask
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.AbstractCompile
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import com.lagradost.cloudstream3.gradle.findCloudstream
 
 const val TASK_GROUP = "cloudstream"
 
@@ -36,23 +34,18 @@ fun registerTasks(project: Project) {
 
     val pluginClassFile = intermediates.resolve("pluginClass")
 
-    val compileDex = project.tasks.register("compileDex", CompileDexTask::class.java) { task ->
-        task.group = TASK_GROUP
-        task.pluginClassFile.set(pluginClassFile)
+    val compileDex = project.tasks.register("compileDex", CompileDexTask::class.java) {
+        it.group = TASK_GROUP
 
-        val kotlinTask = project.tasks.findByName("compileDebugKotlin") as? KotlinCompile
-        kotlinTask?.let {
-            task.dependsOn(it)
-            task.input.from(it.destinationDirectory)
+        it.pluginClassFile.set(pluginClassFile)
+
+        val kotlinTask = project.tasks.findByName("compileDebugKotlin") as KotlinCompile?
+        if (kotlinTask != null) {
+            it.dependsOn(kotlinTask)
+            it.input.from(kotlinTask.destinationDirectory)
         }
 
-        val javacTask = project.tasks.findByName("compileDebugJavaWithJavac") as? AbstractCompile
-        javacTask?.let {
-            task.dependsOn(it)
-            task.input.from(it.destinationDirectory)
-        }
-
-        task.outputFile.set(intermediates.resolve("classes.dex"))
+        it.outputFile.set(intermediates.resolve("classes.dex"))
     }
 
     val compileResources = project.tasks.register("compileResources", CompileResourcesTask::class.java) {
