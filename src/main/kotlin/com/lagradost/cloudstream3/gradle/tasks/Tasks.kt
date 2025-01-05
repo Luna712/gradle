@@ -39,18 +39,18 @@ fun registerTasks(project: Project) {
     val compileDex = project.tasks.register("compileDex", CompileDexTask::class.java) {
         it.group = TASK_GROUP
 
-        this@register.pluginClassFile.set(pluginClassFile)
+        it.pluginClassFile.set(pluginClassFile)
 
-        val compileKotlinTask = project.tasks.findByName("compileDebugKotlin") as KotlinCompile?
-        if (compileKotlinTask != null) {
-            it.dependsOn(compileKotlinTask)
-            it.input.from(compileKotlinTask.destinationDirectory)
+        val kotlinTask = project.tasks.findByName("compileDebugKotlin") as KotlinCompile?
+        if (kotlinTask != null) {
+            it.dependsOn(kotlinTask)
+            it.input.from(kotlinTask.destinationDirectory)
         }
 
-        val compileJavaWithJavac = project.tasks.findByName("compileDebugJavaWithJavac") as AbstractCompile?
-        if (compileJavaWithJavac != null) {
-            it.dependsOn(compileJavaWithJavac)
-            it.input.from(compileJavaWithJavac.destinationDirectory)
+        val javacTask = project.tasks.findByName("compileDebugJavaWithJavac") as AbstractCompile?
+        if (javacTask != null) {
+            it.dependsOn(javacTask)
+            it.input.from(javacTask.destinationDirectory)
         }
 
         it.outputFile.set(intermediates.resolve("classes.dex"))
