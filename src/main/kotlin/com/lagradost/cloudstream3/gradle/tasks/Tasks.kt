@@ -10,6 +10,7 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.AbstractCopyTask
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.AbstractCompile
+import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 const val TASK_GROUP = "cloudstream"
@@ -40,15 +41,7 @@ fun registerTasks(project: Project) {
         task.outputFile.set(intermediates.resolve("classes.dex"))
     }
 
-    project.afterEvaluate {
-        val kotlinTask = project.tasks.findByName("compileDebugKotlin") as KotlinCompile?
-        if (kotlinTask != null) {
-            compileDex.configure { task ->
-                task.dependsOn(kotlinTask)
-                task.input.from(kotlinTask.destinationDirectory)
-            }
-        }
-    }
+    configureCompileDexDependencies(project, compileDex)
 
     val compileResources = project.tasks.register("compileResources", CompileResourcesTask::class.java) {
         it.group = TASK_GROUP
@@ -75,48 +68,47 @@ fun registerTasks(project: Project) {
         }
     }
 
-    project.afterEvaluate {
-        val make = project.tasks.register("make", Zip::class.java) {
-            val compileDexTask = compileDex.get()
-            it.dependsOn(compileDexTask)
+    val make = project.tasks.register("make", Zip::class.java) {
+        val compileDexTask = compileDex.get()
+        it.dependsOn(compileDexTask)
 
-            val manifestFile = intermediates.resolve("manifest.json")
-            it.from(manifestFile)
-            it.doFirst {
-                if (extension.pluginClassName == null) {
-                    if (pluginClassFile.exists()) {
-                        extension.pluginClassName = pluginClassFile.readText()
-                    }
+        val manifestFile = intermediates.resolve("manifest.json")
+        it.from(manifestFile)
+        it.doFirst {
+            if (extension.pluginClassName == null) {
+                if (pluginClassFile.exists()) {
+                    extension.pluginClassName = pluginClassFile.readText()
                 }
-
-                manifestFile.writeText(
-                    JsonBuilder(project.makeManifest(),
-                        JsonGenerator.Options()
-                        .excludeNulls()
-                        .build()
-                    ).toString()
-                )
             }
 
-            it.from(compileDexTask.outputFile)
-
-            val zip = it as Zip
-            if (extension.requiresResources) {
-                zip.dependsOn(compileResources.get())
-            }
-            zip.isPreserveFileTimestamps = false
-            zip.archiveBaseName.set(project.name)
-            zip.archiveExtension.set("cs3")
-            zip.archiveVersion.set("")
-            zip.destinationDirectory.set(project.buildDir)
-
-            it.doLast { task ->
-                extension.fileSize = task.outputs.files.singleFile.length()
-                task.logger.lifecycle("Made Cloudstream package at ${task.outputs.files.singleFile}")
-            }
+            manifestFile.writeText(
+                JsonBuilder(project.makeManifest(),
+                    JsonGenerator.Options()
+                    .excludeNulls()
+                    .build()
+                ).toString()
+            )
         }
-        project.rootProject.tasks.getByName("makePluginsJson").dependsOn(make)
+
+        it.from(compileDexTask.outputFile)
+
+        val zip = it as Zip
+        if (extension.requiresResources) {
+            zip.dependsOn(compileResources.get())
+        }
+        zip.isPreserveFileTimestamps = false
+        zip.archiveBaseName.set(project.name)
+        zip.archiveExtension.set("cs3")
+        zip.archiveVersion.set("")
+        zip.destinationDirectory.set(project.buildDir)
+
+        it.doLast { task ->
+            extension.fileSize = task.outputs.files.singleFile.length()
+            task.logger.lifecycle("Made Cloudstream package at ${task.outputs.files.singleFile}")
+        }
     }
+
+    project.rootProject.tasks.getByName("makePluginsJson").dependsOn(make)
 
     project.tasks.register("cleanCache", CleanCacheTask::class.java) {
         it.group = TASK_GROUP
@@ -125,5 +117,15 @@ fun registerTasks(project: Project) {
     project.tasks.register("deployWithAdb", DeployWithAdbTask::class.java) {
         it.group = TASK_GROUP
         it.dependsOn("make")
+    }
+}
+
+fun configureCompileDexDependencies(project: Project, compileDex: TaskProvider<CompileDexTask>) {
+    val kotlinTask = project.tasks.findByName("compileDebugKotlin") as KotlinCompile?
+    if (kotlinTask != null) {
+        compileDex.configure { task ->
+            task.dependsOn(kotlinTask)
+            task.input.from(kotlinTask.destinationDirectory)
+        }
     }
 }
