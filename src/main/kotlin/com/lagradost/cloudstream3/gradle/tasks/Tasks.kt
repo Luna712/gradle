@@ -36,18 +36,18 @@ fun registerTasks(project: Project) {
 
     val compileDex = project.tasks.register("compileDex", CompileDexTask::class.java) { task ->
         task.group = TASK_GROUP
-
         task.pluginClassFile.set(pluginClassFile)
+        task.outputFile.set(intermediates.resolve("classes.dex"))
+    }
 
-        project.afterEvaluate {
-            val kotlinTask = project.tasks.findByName("compileDebugKotlin") as KotlinCompile?
-            if (kotlinTask != null) {
+    project.afterEvaluate {
+        val kotlinTask = project.tasks.findByName("compileDebugKotlin") as KotlinCompile?
+        if (kotlinTask != null) {
+            compileDex.configure { task ->
                 task.dependsOn(kotlinTask)
                 task.input.from(kotlinTask.destinationDirectory)
             }
         }
-
-        task.outputFile.set(intermediates.resolve("classes.dex"))
     }
 
     val compileResources = project.tasks.register("compileResources", CompileResourcesTask::class.java) {
