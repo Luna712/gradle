@@ -39,10 +39,12 @@ fun registerTasks(project: Project) {
 
         it.pluginClassFile.set(pluginClassFile)
 
-        val kotlinTask = project.tasks.findByName("compileDebugKotlin") as KotlinCompile?
-        if (kotlinTask != null) {
-            it.dependsOn(kotlinTask)
-            it.input.from(kotlinTask.destinationDirectory)
+        project.afterEvaluate {
+            val kotlinTask = project.tasks.findByName("compileDebugKotlin") as KotlinCompile?
+            if (kotlinTask != null) {
+                it.dependsOn(kotlinTask)
+                it.input.from(kotlinTask.destinationDirectory)
+            }
         }
 
         it.outputFile.set(intermediates.resolve("classes.dex"))
