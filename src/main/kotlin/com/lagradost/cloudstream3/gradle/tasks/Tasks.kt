@@ -8,6 +8,7 @@ import groovy.json.JsonBuilder
 import groovy.json.JsonGenerator
 import org.gradle.api.Project
 import org.gradle.api.tasks.AbstractCopyTask
+import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.AbstractCompile
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -118,44 +119,47 @@ fun registerTasks(project: Project) {
         }
     }
 
-    val ensureJarCompatibility = project.tasks.register("ensureJarCompatibility") {
-        it.group = TASK_GROUP
-        it.dependsOn("compilePluginJar")
-        it.doLast { task ->
-            if (!extension.isCrossPlatform) {
+    val jdepsExec = tasks.register<Exec>("jdepsExec") {
+        group = TASK_GROUP
+        dependsOn("compilePluginJar")
+
+        val jarFile = layout.buildDirectory.file("${project.name}.jar")
+        inputs.file(jarFile)
+
+        commandLine("jdeps", "--print-module-deps", jarFile.get().asFile.absolutePath)
+
+        // Write output to a temp file so Gradle can track it
+        val outputFile = layout.buildDirectory.file("jdeps-output.txt")
+        outputs.file(outputFile)
+        standardOutput = outputFile.get().asFile.outputStream()
+        errorOutput = System.err
+        isIgnoreExitValue = true
+    }
+
+    tasks.register("ensureJarCompatibility") {
+        group = TASK_GROUP
+        dependsOn(jdepsExec)
+
+        doLast {
+            if (!extension.isCrossPlatform) return@doLast
+
+            val outputFile = layout.buildDirectory.file("jdeps-output.txt").get().asFile
+            if (!outputFile.exists()) {
+                logger.warn("Jdeps failed! Cannot analyze jar file for Android imports!")
                 return@doLast
             }
 
-            val jarFile = File("${project.buildDir}/${project.name}.jar")
-            if (!jarFile.exists()) {
-                throw GradleException("Jar file does not exist.")
-                return@doLast
-            }
-
-            // Run jdeps command
-            try {
-                val jdepsOutput = ByteArrayOutputStream()
-                val jdepsCommand = listOf("jdeps", "--print-module-deps", jarFile.absolutePath)
-
-                project.providers.exec { execTask ->
-                    execTask.setCommandLine(jdepsCommand)
-                    execTask.setStandardOutput(jdepsOutput)
-                    execTask.setErrorOutput(System.err)
-                    execTask.setIgnoreExitValue(true)
-                }.result.get()
-
-                val output = jdepsOutput.toString()
-
-                // Check if 'android.' is in the output
-                if (output.isEmpty()) {
-                    task.logger.warn("No output from jdeps! Cannot analyze jar file for Android imports!")
-                } else if (output.contains("android.")) {
-                    throw GradleException("The cross-platform jar file contains Android imports! This will cause compatibility issues.\nRemove 'isCrossPlatform = true' or remove the Android imports.")
-                } else {
-                    task.logger.lifecycle("SUCCESS: The cross-platform jar file does not contain Android imports")
-                }
-            } catch (e: org.gradle.process.internal.ExecException) {
-                task.logger.warn("Jdeps failed! Cannot analyze jar file for Android imports!")
+            val output = outputFile.readText().trim()
+            if (output.isEmpty()) {
+                logger.warn("No output from jdeps! Cannot analyze jar file for Android imports!")
+            } else if (output.contains("android.")) {
+                throw GradleException(
+                    "The cross-platform jar file contains Android imports! " +
+                        "This will cause compatibility issues.\n" +
+                        "Remove 'isCrossPlatform = true' or remove the Android imports."
+                )
+            } else {
+                logger.lifecycle("SUCCESS: The cross-platform jar file does not contain Android imports")
             }
         }
     }
