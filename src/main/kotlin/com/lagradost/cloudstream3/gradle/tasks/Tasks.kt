@@ -124,6 +124,9 @@ fun registerTasks(project: Project) {
     val ensureJarCompatibility = project.tasks.register<Exec>("ensureJarCompatibility", Exec::class.java) { task: Exec ->
         task.group = TASK_GROUP
         task.dependsOn("compilePluginJar")
+        // Dummy commandLine to satisfy Exec task (won't actually be used)
+        task.commandLine = listOf("echo", "Ensuring jar compatibility...") 
+        task.isIgnoreExitValue = true
         task.doLast {
             if (!extension.isCrossPlatform) {
                 return@doLast
