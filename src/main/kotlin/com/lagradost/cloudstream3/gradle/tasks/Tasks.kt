@@ -20,7 +20,7 @@ const val TASK_GROUP = "cloudstream"
 
 fun registerTasks(project: Project) {
     val extension = project.extensions.getCloudstream()
-    val intermediates = project.buildDir.resolve("intermediates")
+    val intermediates = project.layout.buildDirectory.resolve("intermediates")
 
     if (project.rootProject.tasks.findByName("makePluginsJson") == null) {
         project.rootProject.tasks.register("makePluginsJson", MakePluginsJsonTask::class.java) {
@@ -28,7 +28,7 @@ fun registerTasks(project: Project) {
 
             it.outputs.upToDateWhen { false }
 
-            it.outputFile.set(it.project.buildDir.resolve("plugins.json"))
+            it.outputFile.set(it.project.layout.buildDirectory.resolve("plugins.json"))
         }
     }
 
@@ -108,7 +108,7 @@ fun registerTasks(project: Project) {
             val jarFile =
                 jarTask.outputs.files.singleFile // Output directory of createFullJarDebug
             if (jarFile != null) {
-                val targetDir = project.buildDir // Top-level build directory
+                val targetDir = project.layout.buildDirectory // Top-level build directory
                 val targetFile = targetDir.resolve("${project.name}.jar")
                 jarFile.copyTo(targetFile, overwrite = true)
                 extension.jarFileSize = jarFile.length()
@@ -165,7 +165,7 @@ fun registerTasks(project: Project) {
             zip.archiveBaseName.set(project.name)
             zip.archiveExtension.set("cs3")
             zip.archiveVersion.set("")
-            zip.destinationDirectory.set(project.buildDir)
+            zip.destinationDirectory.set(project.layout.buildDirectory)
 
             it.doLast { task ->
                 extension.fileSize = task.outputs.files.singleFile.length()
