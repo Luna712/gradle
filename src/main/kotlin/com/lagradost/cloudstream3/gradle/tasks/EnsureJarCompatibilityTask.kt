@@ -1,15 +1,15 @@
 package com.lagradost.cloudstream3.gradle.tasks
 
-import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.TaskAction
-import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.provider.Property
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.GradleException
 import java.io.File
 
-abstract class EnsureJarCompatibilityTask : DefaultTask() {
+abstract class EnsureJarCompatibilityTask : Exec() {
 
     @get:InputFile
     abstract val jarFile: RegularFileProperty
@@ -17,23 +17,31 @@ abstract class EnsureJarCompatibilityTask : DefaultTask() {
     @get:Input
     abstract val isCrossPlatform: Property<Boolean>
 
-    @TaskAction
-    fun checkJar() {
+    @get:OutputFile
+    val outputFile = project.layout.buildDirectory.file("jdeps-output.txt")
+
+    init {
+        // Wire inputs and outputs for up-to-date checks
+        inputs.file(jarFile)
+        outputs.file(outputFile)
+    }
+
+    override fun exec() {
         if (!isCrossPlatform.get()) return
 
         val jar = jarFile.get().asFile
         if (!jar.exists()) throw GradleException("Jar file does not exist: ${jar.absolutePath}")
 
-        val outputFile = project.layout.buildDirectory.file("jdeps-output.txt").get().asFile
+        commandLine("jdeps", "--print-module-deps", jar.absolutePath)
+        standardOutput = outputFile.get().asFile.outputStream()
+        errorOutput = System.err
+        isIgnoreExitValue = true
 
-        project.exec {
-            commandLine("jdeps", "--print-module-deps", jar.absolutePath)
-            standardOutput = outputFile.outputStream()
-            errorOutput = System.err
-            isIgnoreExitValue = true
-        }
+        super.exec() // actually runs the exec
+    }
 
-        val output = outputFile.readText().trim()
+    fun checkOutput() {
+        val output = outputFile.get().asFile.readText().trim()
         when {
             output.isEmpty() -> logger.warn("No output from jdeps! Cannot analyze jar file for Android imports!")
             "android." in output -> throw GradleException(
