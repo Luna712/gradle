@@ -14,6 +14,7 @@ import org.gradle.api.tasks.compile.AbstractCompile
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.ByteArrayOutputStream
 import org.gradle.api.GradleException
+import org.gradle.internal.jvm.Jvm
 import org.gradle.process.ExecSpec
 import java.io.File
 
@@ -137,8 +138,9 @@ fun registerTasks(project: Project) {
             // Run jdeps command
             try {
                 val jdepsOutput = ByteArrayOutputStream()
+                val javaBin = Jvm.current().javaHome.resolve("bin")
                 project.exec { execSpec: ExecSpec ->
-                    execSpec.commandLine("jdeps", "--print-module-deps", jarFile.absolutePath)
+                    execSpec.commandLine(javaBin.resolve("jdeps").toString(), "--print-module-deps", jarFile.absolutePath)
                     execSpec.standardOutput = jdepsOutput
                     execSpec.errorOutput = System.err
                     execSpec.isIgnoreExitValue = true
