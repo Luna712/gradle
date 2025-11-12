@@ -137,7 +137,7 @@ fun registerTasks(project: Project) {
                 val jdepsOutput = ByteArrayOutputStream()
                 val jdepsCommand = listOf("jdeps", "--print-module-deps", jarFile.absolutePath)
 
-                project.exec { execTask ->
+                project.providers.exec { execTask ->
                     execTask.setCommandLine(jdepsCommand)
                     execTask.setStandardOutput(jdepsOutput)
                     execTask.setErrorOutput(System.err)
