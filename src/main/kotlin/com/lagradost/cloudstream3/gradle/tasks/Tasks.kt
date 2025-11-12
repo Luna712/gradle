@@ -125,7 +125,7 @@ fun registerTasks(project: Project) {
         task.group = TASK_GROUP
         task.dependsOn("compilePluginJar")
         // Dummy commandLine to satisfy Exec task (won't actually be used)
-        task.commandLine = listOf("echo", "Ensuring jar compatibility...") 
+        task.commandLine = listOf("echo", "") 
         task.isIgnoreExitValue = true
         task.doLast {
             if (!extension.isCrossPlatform) {
@@ -143,7 +143,8 @@ fun registerTasks(project: Project) {
                 val jdepsOutput = ByteArrayOutputStream()
                 val javaBin = Jvm.current().javaHome.resolve("bin")
 
-                task.commandLine(javaBin.resolve("jdeps").absolutePath, "--print-module-deps", jarFile.absolutePath)
+                task.executable = "jdeps"
+                task.args("--print-module-deps", jarFile.absolutePath)
                 task.standardOutput = jdepsOutput
                 task.errorOutput = System.err
                 task.isIgnoreExitValue = true
