@@ -119,49 +119,10 @@ fun registerTasks(project: Project) {
         }
     }
 
-    val jdepsExec = tasks.register<Exec>("jdepsExec") {
-        group = TASK_GROUP
-        dependsOn("compilePluginJar")
-
-        val jarFile = layout.buildDirectory.file("${project.name}.jar")
-        inputs.file(jarFile)
-
-        commandLine("jdeps", "--print-module-deps", jarFile.get().asFile.absolutePath)
-
-        // Write output to a temp file so Gradle can track it
-        val outputFile = layout.buildDirectory.file("jdeps-output.txt")
-        outputs.file(outputFile)
-        standardOutput = outputFile.get().asFile.outputStream()
-        errorOutput = System.err
-        isIgnoreExitValue = true
-    }
-
-    tasks.register("ensureJarCompatibility") {
-        group = TASK_GROUP
-        dependsOn(jdepsExec)
-
-        doLast {
-            if (!extension.isCrossPlatform) return@doLast
-
-            val outputFile = layout.buildDirectory.file("jdeps-output.txt").get().asFile
-            if (!outputFile.exists()) {
-                logger.warn("Jdeps failed! Cannot analyze jar file for Android imports!")
-                return@doLast
-            }
-
-            val output = outputFile.readText().trim()
-            if (output.isEmpty()) {
-                logger.warn("No output from jdeps! Cannot analyze jar file for Android imports!")
-            } else if (output.contains("android.")) {
-                throw GradleException(
-                    "The cross-platform jar file contains Android imports! " +
-                        "This will cause compatibility issues.\n" +
-                        "Remove 'isCrossPlatform = true' or remove the Android imports."
-                )
-            } else {
-                logger.lifecycle("SUCCESS: The cross-platform jar file does not contain Android imports")
-            }
-        }
+    project.tasks.register("ensureJarCompatibility", EnsureJarCompatibilityTask::class.java) {
+        it.jarFile.set(project.layout.buildDirectory.file("${project.name}.jar"))
+        it.isCrossPlatform.set(extension.isCrossPlatform)
+        it.dependsOn("compilePluginJar")
     }
 
     project.afterEvaluate {
