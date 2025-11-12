@@ -134,12 +134,17 @@ fun registerTasks(project: Project) {
 
             // Run jdeps command
             try {
+                val jdepsOutput = ByteArrayOutputStream()
                 val jdepsCommand = listOf("jdeps", "--print-module-deps", jarFile.absolutePath)
-                val output = project.providers.exec { execTask ->
+
+                project.providers.exec { execTask ->
                     execTask.setCommandLine(jdepsCommand)
+                    execTask.setStandardOutput(jdepsOutput)
                     execTask.setErrorOutput(System.err)
                     execTask.setIgnoreExitValue(true)
-                }.standardOutput.asText.get()
+                }.result.get()
+
+                val output = jdepsOutput.toString()
 
                 // Check if 'android.' is in the output
                 if (output.isEmpty()) {
