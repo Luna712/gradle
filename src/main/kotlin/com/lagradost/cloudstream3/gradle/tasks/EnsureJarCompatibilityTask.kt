@@ -15,7 +15,7 @@ abstract class EnsureJarCompatibilityTask : Exec() {
     abstract val jarFile: RegularFileProperty
 
     @get:Input
-    abstract val isCrossPlatform: Property<Boolean>
+    abstract val crossPlatform: Property<Boolean>
 
     @get:OutputFile
     val outputFile = project.layout.buildDirectory.file("jdeps-output.txt")
@@ -27,7 +27,7 @@ abstract class EnsureJarCompatibilityTask : Exec() {
     }
 
     override fun exec() {
-        if (!isCrossPlatform.get()) return
+        if (!crossPlatform.get()) return
 
         val jar = jarFile.get().asFile
         if (!jar.exists()) throw GradleException("Jar file does not exist: ${jar.absolutePath}")
