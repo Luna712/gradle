@@ -12,9 +12,8 @@ import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.AbstractCompile
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.ByteArrayOutputStream
-import org.gradle.api.Action
 import org.gradle.api.GradleException
-import org.gradle.api.tasks.ExecSpec
+import org.gradle.process.ExecSpec
 import java.io.File
 
 const val TASK_GROUP = "cloudstream"
@@ -137,15 +136,12 @@ fun registerTasks(project: Project) {
             // Run jdeps command
             try {
                 val jdepsOutput = ByteArrayOutputStream()
-                val jdepsCommand = listOf("jdeps", "--print-module-deps", jarFile.absolutePath)
-
-                val execAction = Action<ExecSpec> { execSpec ->
-                    execSpec.commandLine = listOf("jdeps", "--print-module-deps", jarFile.absolutePath)
-                    execSpec.standardOutput = jdepsOutput
-                    execSpec.errorOutput = System.err
-                    execSpec.isIgnoreExitValue = true
+                project.exec { task: ExecSpec ->
+                    task.commandLine("jdeps", "--print-module-deps", jarFile.absolutePath)
+                    task.standardOutput = jdepsOutput
+                    task.errorOutput = System.err
+                    task.isIgnoreExitValue = true
                 }
-                project.exec(execAction)
 
                 val output = jdepsOutput.toString()
 
