@@ -1,26 +1,25 @@
 package com.lagradost.cloudstream3.gradle.tasks
 
-import com.lagradost.cloudstream3.gradle.getCloudstream
-import com.lagradost.cloudstream3.gradle.makeManifest
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.tasks.ProcessLibraryManifest
+import com.lagradost.cloudstream3.gradle.getCloudstream
+import com.lagradost.cloudstream3.gradle.makeManifest
 import groovy.json.JsonBuilder
 import groovy.json.JsonGenerator
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.tasks.AbstractCopyTask
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.AbstractCompile
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.io.ByteArrayOutputStream
-import org.gradle.api.GradleException
 import java.io.File
 
 const val TASK_GROUP = "cloudstream"
 
 fun registerTasks(project: Project) {
     val extension = project.extensions.getCloudstream()
-    val intermediates = project.buildDir.resolve("intermediates")
+    val intermediatesDir = project.layout.buildDirectory.dir("intermediates")
 
     if (project.rootProject.tasks.findByName("makePluginsJson") == null) {
         project.rootProject.tasks.register("makePluginsJson", MakePluginsJsonTask::class.java) {
@@ -28,7 +27,7 @@ fun registerTasks(project: Project) {
 
             it.outputs.upToDateWhen { false }
 
-            it.outputFile.set(it.project.buildDir.resolve("plugins.json"))
+            it.outputFile.set(project.layout.buildDirectory.file("plugins.json"))
         }
     }
 
@@ -36,7 +35,7 @@ fun registerTasks(project: Project) {
         it.group = TASK_GROUP
     }
 
-    val pluginClassFile = intermediates.resolve("pluginClass")
+    val pluginClassFile = intermediatesDir.map { it.file("pluginClass").asFile }
 
     val compileDex = project.tasks.register("compileDex", CompileDexTask::class.java) {
         it.group = TASK_GROUP
@@ -57,7 +56,7 @@ fun registerTasks(project: Project) {
 //            it.input.from(javacTask.destinationDirectory)
 //        }
 
-        it.outputFile.set(intermediates.resolve("classes.dex"))
+        it.outputFile.set(intermediatesDir.map { it.file("classes.dex").asFile })
     }
 
     val compileResources =
@@ -72,7 +71,7 @@ fun registerTasks(project: Project) {
             it.input.set(android.sourceSets.getByName("main").res.srcDirs.single())
             it.manifestFile.set(processManifestTask.manifestOutputFile)
 
-            it.outputFile.set(intermediates.resolve("res.apk"))
+            it.outputFile.set(intermediatesDir.map { it.file("res.apk").asFile })
 
             it.doLast { _ ->
                 val resApkFile = it.outputFile.asFile.get()
@@ -93,8 +92,8 @@ fun registerTasks(project: Project) {
 
         it.doFirst {
             if (extension.pluginClassName == null) {
-                if (pluginClassFile.exists()) {
-                    extension.pluginClassName = pluginClassFile.readText()
+                if (pluginClassFile.get().exists()) {
+                    extension.pluginClassName = pluginClassFile.get().readText()
                 }
             }
         }
@@ -108,8 +107,7 @@ fun registerTasks(project: Project) {
             val jarFile =
                 jarTask.outputs.files.singleFile // Output directory of createFullJarDebug
             if (jarFile != null) {
-                val targetDir = project.buildDir // Top-level build directory
-                val targetFile = targetDir.resolve("${project.name}.jar")
+                val targetFile = project.layout.buildDirectory.file("${project.name}.jar").get().asFile
                 jarFile.copyTo(targetFile, overwrite = true)
                 extension.jarFileSize = jarFile.length()
                 it.logger.lifecycle("Made Cloudstream cross-platform package at ${targetFile.absolutePath}")
@@ -136,12 +134,12 @@ fun registerTasks(project: Project) {
                 it.dependsOn(compilePluginJar)
             }
 
-            val manifestFile = intermediates.resolve("manifest.json")
+            val manifestFile = intermediatesDir.map { it.file("manifest.json").asFile }.get()
             it.from(manifestFile)
             it.doFirst {
                 if (extension.pluginClassName == null) {
-                    if (pluginClassFile.exists()) {
-                        extension.pluginClassName = pluginClassFile.readText()
+                    if (pluginClassFile.get().exists()) {
+                        extension.pluginClassName = pluginClassFile.get().readText()
                     }
                 }
 
@@ -165,7 +163,7 @@ fun registerTasks(project: Project) {
             zip.archiveBaseName.set(project.name)
             zip.archiveExtension.set("cs3")
             zip.archiveVersion.set("")
-            zip.destinationDirectory.set(project.buildDir)
+            zip.destinationDirectory.set(project.layout.buildDirectory)
 
             it.doLast { task ->
                 extension.fileSize = task.outputs.files.singleFile.length()
