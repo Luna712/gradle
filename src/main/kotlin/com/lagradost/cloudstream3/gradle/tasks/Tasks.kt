@@ -123,6 +123,9 @@ fun registerTasks(project: Project) {
         it.jarFile.set(project.layout.buildDirectory.file("${project.name}.jar"))
         it.isCrossPlatform.set(extension.isCrossPlatform)
         it.dependsOn("compilePluginJar")
+        it.doLast {
+            it.checkOutput()
+        }
     }
 
     project.afterEvaluate {
