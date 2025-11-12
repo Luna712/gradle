@@ -139,6 +139,8 @@ fun registerTasks(project: Project) {
             try {
                 val jdepsOutput = ByteArrayOutputStream()
                 val javaBin = Jvm.current().javaHome.resolve("bin")
+                val jdepsFile = javaBin.resolve("jdeps")
+                println("Jdeps path: ${jdepsFile.absolutePath}, exists=${jdepsFile.exists()}")
                 project.exec { execSpec: ExecSpec ->
                     execSpec.commandLine(javaBin.resolve("jdeps").toString(), "--print-module-deps", jarFile.absolutePath)
                     execSpec.standardOutput = jdepsOutput
