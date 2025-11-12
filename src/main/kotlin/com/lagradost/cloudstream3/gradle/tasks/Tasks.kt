@@ -8,6 +8,7 @@ import groovy.json.JsonBuilder
 import groovy.json.JsonGenerator
 import org.gradle.api.Project
 import org.gradle.api.tasks.AbstractCopyTask
+import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.AbstractCompile
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -119,10 +120,10 @@ fun registerTasks(project: Project) {
         }
     }
 
-    val ensureJarCompatibility = project.tasks.register("ensureJarCompatibility") {
-        it.group = TASK_GROUP
-        it.dependsOn("compilePluginJar")
-        it.doLast { task ->
+    val ensureJarCompatibility = project.tasks.register<Exec>("ensureJarCompatibility", Exec::class.java) { execTask: Exec ->
+        execTask.group = TASK_GROUP
+        execTask.dependsOn("compilePluginJar")
+        execTask.doLast { task ->
             if (!extension.isCrossPlatform) {
                 return@doLast
             }
@@ -136,11 +137,11 @@ fun registerTasks(project: Project) {
             // Run jdeps command
             try {
                 val jdepsOutput = ByteArrayOutputStream()
-                project.exec { execTask: ExecSpec ->
-                    execTask.commandLine("jdeps", "--print-module-deps", jarFile.absolutePath)
-                    execTask.standardOutput = jdepsOutput
-                    execTask.errorOutput = System.err
-                    execTask.isIgnoreExitValue = true
+                project.exec { execSpec: ExecSpec ->
+                    execSpec.commandLine("jdeps", "--print-module-deps", jarFile.absolutePath)
+                    execSpec.standardOutput = jdepsOutput
+                    execSpec.errorOutput = System.err
+                    execSpec.isIgnoreExitValue = true
                 }
 
                 val output = jdepsOutput.toString()
