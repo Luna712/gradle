@@ -35,7 +35,7 @@ fun registerTasks(project: Project) {
         it.group = TASK_GROUP
     }
 
-    val pluginClassFile = intermediatesDir.map { it.file("pluginClass").asFile }
+    val pluginClassFile = intermediatesDir.map { it.file("pluginClass") }
 
     val compileDex = project.tasks.register("compileDex", CompileDexTask::class.java) {
         it.group = TASK_GROUP
@@ -56,7 +56,7 @@ fun registerTasks(project: Project) {
 //            it.input.from(javacTask.destinationDirectory)
 //        }
 
-        it.outputFile.set(intermediatesDir.map { it.file("classes.dex").asFile })
+        it.outputFile.set(intermediatesDir.map { it.file("classes.dex") })
     }
 
     val compileResources =
@@ -71,7 +71,7 @@ fun registerTasks(project: Project) {
             it.input.set(android.sourceSets.getByName("main").res.srcDirs.single())
             it.manifestFile.set(processManifestTask.manifestOutputFile)
 
-            it.outputFile.set(intermediatesDir.map { it.file("res.apk").asFile })
+            it.outputFile.set(intermediatesDir.map { it.file("res.apk") })
 
             it.doLast { _ ->
                 val resApkFile = it.outputFile.asFile.get()
@@ -92,8 +92,8 @@ fun registerTasks(project: Project) {
 
         it.doFirst {
             if (extension.pluginClassName == null) {
-                if (pluginClassFile.get().exists()) {
-                    extension.pluginClassName = pluginClassFile.get().readText()
+                if (pluginClassFile.get().asFile.exists()) {
+                    extension.pluginClassName = pluginClassFile.get().asFile.readText()
                 }
             }
         }
@@ -134,16 +134,16 @@ fun registerTasks(project: Project) {
                 it.dependsOn(compilePluginJar)
             }
 
-            val manifestFile = intermediatesDir.map { it.file("manifest.json").asFile }.get()
+            val manifestFile = intermediatesDir.map { it.file("manifest.json") }.get()
             it.from(manifestFile)
             it.doFirst {
                 if (extension.pluginClassName == null) {
-                    if (pluginClassFile.get().exists()) {
-                        extension.pluginClassName = pluginClassFile.get().readText()
+                    if (pluginClassFile.get().asFile.exists()) {
+                        extension.pluginClassName = pluginClassFile.get().asFile.readText()
                     }
                 }
 
-                manifestFile.writeText(
+                manifestFile.asFile.writeText(
                     JsonBuilder(
                         project.makeManifest(),
                         JsonGenerator.Options()
