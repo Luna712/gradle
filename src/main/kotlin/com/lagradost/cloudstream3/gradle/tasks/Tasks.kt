@@ -136,11 +136,11 @@ fun registerTasks(project: Project) {
             // Run jdeps command
             try {
                 val jdepsOutput = ByteArrayOutputStream()
-                project.exec { task: ExecSpec ->
-                    task.commandLine("jdeps", "--print-module-deps", jarFile.absolutePath)
-                    task.standardOutput = jdepsOutput
-                    task.errorOutput = System.err
-                    task.isIgnoreExitValue = true
+                project.exec { execTask: ExecSpec ->
+                    execTask.commandLine("jdeps", "--print-module-deps", jarFile.absolutePath)
+                    execTask.standardOutput = jdepsOutput
+                    execTask.errorOutput = System.err
+                    execTask.isIgnoreExitValue = true
                 }
 
                 val output = jdepsOutput.toString()
