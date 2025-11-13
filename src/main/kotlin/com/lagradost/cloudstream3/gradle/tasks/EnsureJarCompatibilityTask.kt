@@ -21,13 +21,8 @@ abstract class EnsureJarCompatibilityTask : Exec() {
     val outputFile = project.layout.buildDirectory.file("jdeps-output.txt")
 
     init {
-        // Only register if cross-platform is enabled
-        hasCrossPlatformSupport.map { enabled ->
-            if (enabled) {
-                inputs.file(jarFile)
-                outputs.file(outputFile)
-            }
-        }
+        inputs.file(jarFile)
+        outputs.file(outputFile)
     }
 
     override fun exec() {
@@ -45,7 +40,6 @@ abstract class EnsureJarCompatibilityTask : Exec() {
     }
 
     fun checkOutput() {
-        if (!hasCrossPlatformSupport.get()) return
         val output = outputFile.get().asFile.readText().trim()
         when {
             output.isEmpty() -> logger.warn("No output from jdeps! Cannot analyze jar file for Android imports!")
