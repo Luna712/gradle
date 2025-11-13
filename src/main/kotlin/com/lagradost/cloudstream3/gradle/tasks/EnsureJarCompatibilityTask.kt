@@ -15,19 +15,23 @@ abstract class EnsureJarCompatibilityTask : Exec() {
     abstract val jarFile: RegularFileProperty
 
     @get:Input
-    abstract val crossPlatform: Property<Boolean>
+    abstract val hasCrossPlatformSupport: Property<Boolean>
 
     @get:OutputFile
     val outputFile = project.layout.buildDirectory.file("jdeps-output.txt")
 
     init {
-        // Wire inputs and outputs for up-to-date checks
-        inputs.file(jarFile)
-        outputs.file(outputFile)
+        // Only register if cross-platform is enabled
+        hasCrossPlatformSupport.map { enabled ->
+            if (enabled) {
+                inputs.file(jarFile)
+                outputs.file(outputFile)
+            }
+        }
     }
 
     override fun exec() {
-        if (!crossPlatform.get()) return
+        if (!hasCrossPlatformSupport.get()) return
 
         val jar = jarFile.get().asFile
         if (!jar.exists()) throw GradleException("Jar file does not exist: ${jar.absolutePath}")
@@ -41,6 +45,7 @@ abstract class EnsureJarCompatibilityTask : Exec() {
     }
 
     fun checkOutput() {
+        if (!hasCrossPlatformSupport.get()) return
         val output = outputFile.get().asFile.readText().trim()
         when {
             output.isEmpty() -> logger.warn("No output from jdeps! Cannot analyze jar file for Android imports!")
