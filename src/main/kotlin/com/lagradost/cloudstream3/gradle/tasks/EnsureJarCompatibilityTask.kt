@@ -22,11 +22,6 @@ abstract class EnsureJarCompatibilityTask : Exec() {
     @get:OutputFile
     val outputFile = project.layout.buildDirectory.file("jdeps-output.txt")
 
-    init {
-        inputs.file(jarFile)
-        outputs.file(outputFile)
-    }
-
     override fun exec() {
         if (!hasCrossPlatformSupport.get()) return
 
