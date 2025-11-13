@@ -37,7 +37,6 @@ abstract class EnsureJarCompatibilityTask : Exec() {
     }
 
     fun checkOutput() {
-        if (!hasCrossPlatformSupport.get()) return
         val output = outputFile.get().asFile.readText().trim()
         when {
             output.isEmpty() -> logger.warn("No output from jdeps! Cannot analyze jar file for Android imports!")
