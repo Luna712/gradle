@@ -118,10 +118,10 @@ fun registerTasks(project: Project) {
     }
 
     project.tasks.register("ensureJarCompatibility", EnsureJarCompatibilityTask::class.java) { task ->
-        task.jarFile.set(project.layout.buildDirectory.file("${project.name}.jar"))
-        task.crossPlatform.set(extension.isCrossPlatform)
         task.dependsOn("compilePluginJar")
         task.doLast {
+            if (!extension.isCrossPlatform) return@doLast
+            task.jarFile.set(project.layout.buildDirectory.file("${project.name}.jar"))
             task.checkOutput()
         }
     }
