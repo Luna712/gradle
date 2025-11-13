@@ -27,7 +27,7 @@ fun registerTasks(project: Project) {
 
             it.outputs.upToDateWhen { false }
 
-            it.outputFile.set(project.layout.buildDirectory.file("plugins.json"))
+            it.outputFile.set(it.project.layout.buildDirectory.file("plugins.json"))
         }
     }
 
