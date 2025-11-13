@@ -50,7 +50,7 @@ abstract class CompileDexTask : DefaultTask() {
         Closer.create().use { closer ->
             val dexBuilder = DexArchiveBuilder.createD8DexBuilder(
                 DexParameters(
-                    minSdkVersion = minSdk,
+                    minSdkVersion = minSdk.get(),
                     debuggable = true,
                     dexPerClass = false,
                     withDesugaring = true, // Make all plugins work on lower android versions
