@@ -12,6 +12,7 @@ import java.io.File
 abstract class EnsureJarCompatibilityTask : Exec() {
 
     @get:InputFile
+    @get:Optional
     abstract val jarFile: RegularFileProperty
 
     @get:Input
