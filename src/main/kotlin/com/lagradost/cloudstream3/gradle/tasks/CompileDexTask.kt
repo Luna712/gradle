@@ -33,12 +33,17 @@ abstract class CompileDexTask : DefaultTask() {
     @get:OutputFile
     abstract val pluginClassFile: RegularFileProperty
 
+    @get:Internal
+	abstract val pluginClassName: Property<String?>
+
+    @get:Input
+	abstract val minSdk: Property<Int>
+
+	@get:InputFiles
+	abstract val bootClasspath: ConfigurableFileCollection
+
     @TaskAction
     fun compileDex() {
-        val android = project.extensions.getByName("android") as BaseExtension
-
-        val minSdk = android.defaultConfig.minSdk ?: 21
-
         val dexOutputDir = outputFile.get().asFile.parentFile
 
         Closer.create().use { closer ->
@@ -48,7 +53,7 @@ abstract class CompileDexTask : DefaultTask() {
                     debuggable = true,
                     dexPerClass = false,
                     withDesugaring = true, // Make all plugins work on lower android versions
-                    desugarBootclasspath = ClassFileProviderFactory(android.bootClasspath.map(File::toPath))
+                    desugarBootclasspath = ClassFileProviderFactory(bootClasspath.files.map(File::toPath))
                         .also { closer.register(it) },
                     desugarClasspath = ClassFileProviderFactory(listOf<Path>()).also {
                         closer.register(
@@ -86,14 +91,13 @@ abstract class CompileDexTask : DefaultTask() {
 
                         for (annotation in classNode.visibleAnnotations.orEmpty() + classNode.invisibleAnnotations.orEmpty()) {
                             if (annotation.desc == "Lcom/lagradost/cloudstream3/plugins/CloudstreamPlugin;") {
-                                val cloudstream = project.extensions.getCloudstream()
-
-                                require(cloudstream.pluginClassName == null) {
+                                require(pluginClassName.orNull == null) {
                                     "Only 1 active plugin class per project is supported"
                                 }
 
-                                cloudstream.pluginClassName = classNode.name.replace('/', '.')
-                                    .also { pluginClassFile.asFile.orNull?.writeText(it) }
+                                val detectedName = classNode.name.replace('/', '.')
+                                pluginClassFile.asFile.orNull?.writeText(detectedName)
+                                pluginClassName.set(detectedName)
                             }
                         }
                     }
