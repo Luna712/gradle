@@ -39,7 +39,7 @@ dependencies {
     implementation(kotlin("stdlib", kotlin.coreLibrariesVersion))
     compileOnly(gradleApi())
 
-    compileOnly("com.google.guava:guava:30.1.1-jre")
+    compileOnly("com.google.guava:guava:33.5.0-jre")
     compileOnly("com.android.tools:sdk-common:30.0.0")
     compileOnly("com.android.tools.build:gradle:8.7.3")
     compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.0")
