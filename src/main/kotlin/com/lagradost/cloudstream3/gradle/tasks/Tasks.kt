@@ -2,8 +2,10 @@ package com.lagradost.cloudstream3.gradle.tasks
 
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.tasks.ProcessLibraryManifest
+import com.lagradost.cloudstream3.gradle.findCloudstream
 import com.lagradost.cloudstream3.gradle.getCloudstream
 import com.lagradost.cloudstream3.gradle.makeManifest
+import com.lagradost.cloudstream3.gradle.makePluginEntry
 import groovy.json.JsonBuilder
 import groovy.json.JsonGenerator
 import org.gradle.api.GradleException
@@ -22,12 +24,15 @@ fun registerTasks(project: Project) {
     val intermediatesDir = project.layout.buildDirectory.dir("intermediates")
 
     if (project.rootProject.tasks.findByName("makePluginsJson") == null) {
-        project.rootProject.tasks.register("makePluginsJson", MakePluginsJsonTask::class.java) {
-            it.group = TASK_GROUP
-
-            it.outputs.upToDateWhen { false }
-
-            it.outputFile.set(it.project.layout.buildDirectory.file("plugins.json"))
+        project.rootProject.tasks.register("makePluginsJson", MakePluginsJsonTask::class.java) { task ->
+            task.group = TASK_GROUP
+            task.outputs.upToDateWhen { false }
+            task.outputFile.set(task.project.layout.buildDirectory.file("plugins.json"))
+            task.pluginEntries.set(project.allprojects
+                .mapNotNull { sub ->
+                    sub.extensions.findCloudstream()?.let { sub.makePluginEntry() }
+                }
+            )
         }
     }
 
