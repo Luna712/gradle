@@ -28,11 +28,15 @@ fun registerTasks(project: Project) {
             task.group = TASK_GROUP
             task.outputs.upToDateWhen { false }
             task.outputFile.set(task.project.layout.buildDirectory.file("plugins.json"))
-            task.pluginEntries.set(project.allprojects
+            val entries = project.allprojects
                 .mapNotNull { sub ->
                     sub.extensions.findCloudstream()?.let { sub.makePluginEntry() }
                 }
-            )
+
+            task.pluginEntriesJson.set(JsonBuilder(
+                entries,
+                JsonGenerator.Options().excludeNulls().build()
+            ).toPrettyString())
         }
     }
 
