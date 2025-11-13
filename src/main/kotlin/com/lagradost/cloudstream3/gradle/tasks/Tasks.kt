@@ -170,7 +170,8 @@ fun registerTasks(project: Project) {
                 task.logger.lifecycle("Made Cloudstream package at ${task.outputs.files.singleFile}")
             }
         }
-        project.rootProject.tasks.getByName("makePluginsJson").dependsOn(make)
+
+        make.configure { it.dependsOn("makePluginsJson") }
     }
 
     project.tasks.register("cleanCache", CleanCacheTask::class.java) {
@@ -180,5 +181,6 @@ fun registerTasks(project: Project) {
     project.tasks.register("deployWithAdb", DeployWithAdbTask::class.java) {
         it.group = TASK_GROUP
         it.dependsOn("make")
+        it.dependsOn("makePluginsJson")
     }
 }
