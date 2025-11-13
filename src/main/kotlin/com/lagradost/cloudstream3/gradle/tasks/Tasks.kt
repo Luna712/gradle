@@ -58,8 +58,7 @@ fun registerTasks(project: Project) {
         }
 
         task.doLast {
-            val extension = project.extensions.getCloudstream()
-            extension.pluginClassName = pluginClassName.orNull
+            extension.pluginClassName = task.pluginClassName.orNull
         }
     }
 
