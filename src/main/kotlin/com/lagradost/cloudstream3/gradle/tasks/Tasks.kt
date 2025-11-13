@@ -37,26 +37,30 @@ fun registerTasks(project: Project) {
 
     val pluginClassFile = intermediatesDir.map { it.file("pluginClass") }
 
-    val compileDex = project.tasks.register("compileDex", CompileDexTask::class.java) {
-        it.group = TASK_GROUP
+    val compileDex = project.tasks.register("compileDex", CompileDexTask::class.java) { task ->
+        task.group = TASK_GROUP
 
-        it.pluginClassFile.set(pluginClassFile)
+        task.pluginClassFile.set(pluginClassFile)
+        task.outputFile.set(intermediatesDir.map { dir -> dir.file("classes.dex") })
+
+        val android = project.extensions.findByName("android") as? BaseExtension
+            ?: error("Android plugin not found")
+        task.minSdk.set(android.defaultConfig.minSdk ?: 21)
+        task.bootClasspath.from(android.bootClasspath)
+
+        val extension = project.extensions.getCloudstream()
+        task.pluginClassName.set(extension.pluginClassName)
 
         val kotlinTask = project.tasks.findByName("compileDebugKotlin") as KotlinCompile?
         if (kotlinTask != null) {
-            it.dependsOn(kotlinTask)
-            it.input.from(kotlinTask.destinationDirectory)
+            task.dependsOn(kotlinTask)
+            task.input.from(kotlinTask.destinationDirectory)
         }
 
-        // This task does not seem to be required for a successful cs3 file
-
-//        val javacTask = project.tasks.findByName("compileDebugJavaWithJavac") as AbstractCompile?
-//        if (javacTask != null) {
-//            it.dependsOn(javacTask)
-//            it.input.from(javacTask.destinationDirectory)
-//        }
-
-        it.outputFile.set(intermediatesDir.map { it.file("classes.dex") })
+        task.doLast {
+            val extension = project.extensions.getCloudstream()
+            extension.pluginClassName = pluginClassName.orNull
+        }
     }
 
     val compileResources =
