@@ -98,34 +98,25 @@ fun registerTasks(project: Project) {
             }
         }
 
-    val compilePluginJar = project.tasks.register("compilePluginJar") {
-        it.group = TASK_GROUP
-        it.dependsOn("createFullJarDebug") // Ensure JAR is built before copying
+    val compilePluginJar = project.tasks.register("compilePluginJar") { task ->
+        task.group = TASK_GROUP
+        task.dependsOn("createFullJarDebug") // Ensure JAR is built before copying
 
-        it.doFirst {
-            if (extension.pluginClassName == null) {
-                if (pluginClassFile.get().asFile.exists()) {
-                    extension.pluginClassName = pluginClassFile.get().asFile.readText()
-                }
+        task.doFirst {
+            if (extension.pluginClassName == null && pluginClassFile.get().asFile.exists()) {
+                extension.pluginClassName = pluginClassFile.get().asFile.readText()
             }
         }
 
-        it.doLast {
-            if (!extension.isCrossPlatform) {
-                return@doLast
-            }
+        task.doLast {
+            if (!extension.isCrossPlatform) return@doLast
 
-            val jarTask = project.tasks.findByName("createFullJarDebug") ?: return@doLast
-            val jarFile =
-                jarTask.outputs.files.singleFile // Output directory of createFullJarDebug
-            if (jarFile != null) {
-                val targetFile = project.layout.buildDirectory.file("${project.name}.jar").get().asFile
-                jarFile.copyTo(targetFile, overwrite = true)
-                extension.jarFileSize = jarFile.length()
-                it.logger.lifecycle("Made Cloudstream cross-platform package at ${targetFile.absolutePath}")
-            } else {
-                it.logger.warn("Could not find JAR file!")
-            }
+            val jarFile = project.tasks.named("createFullJarDebug").get().outputs.files.singleFile
+            val targetFile = project.layout.buildDirectory.file("${project.name}.jar").get().asFile
+            jarFile.copyTo(targetFile, overwrite = true)
+            extension.jarFileSize = jarFile.length()
+
+            task.logger.lifecycle("Made Cloudstream cross-platform package at ${targetFile.absolutePath}")
         }
     }
 
