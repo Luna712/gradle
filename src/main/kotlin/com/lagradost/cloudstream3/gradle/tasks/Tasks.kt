@@ -28,7 +28,7 @@ fun registerTasks(project: Project) {
             task.group = TASK_GROUP
             task.outputs.upToDateWhen { false }
             task.outputFile.set(task.project.layout.buildDirectory.file("plugins.json"))
-            val entries = project.allprojects
+            val entries = task.project.allprojects
                 .mapNotNull { sub ->
                     sub.extensions.findCloudstream()?.let { sub.makePluginEntry() }
                 }
