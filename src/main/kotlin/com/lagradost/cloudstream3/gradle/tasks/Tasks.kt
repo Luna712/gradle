@@ -135,6 +135,15 @@ fun registerTasks(project: Project) {
                 it.dependsOn(compilePluginJar)
             }
 
+            val manifestProvider = project.provider {
+                JsonBuilder(
+                    project.makeManifest(),
+                    JsonGenerator.Options()
+                        .excludeNulls()
+                        .build()
+                ).toString()
+            }
+
             val manifestFile = intermediatesDir.map { it.file("manifest.json") }
             it.from(manifestFile)
             it.doFirst {
@@ -144,14 +153,7 @@ fun registerTasks(project: Project) {
                     }
                 }
 
-                manifestFile.get().asFile.writeText(
-                    JsonBuilder(
-                        project.makeManifest(),
-                        JsonGenerator.Options()
-                            .excludeNulls()
-                            .build()
-                    ).toString()
-                )
+                manifestFile.get().asFile.writeText(manifestProvider.get())
             }
 
             it.from(compileDexTask.outputFile)
