@@ -105,7 +105,12 @@ fun registerTasks(project: Project) {
         task.hasCrossPlatformSupport.set(extension.isCrossPlatform)
         task.pluginClassFile.set(pluginClassFile)
         task.pluginClassName.set(extension.pluginClassName)
-        task.jarInputFile.set(jarTask.flatMap { it.archiveFile })
+        task.jarInputFile.set(
+            jarTask.flatMap {
+                val single = it.outputs.files.singleFile
+                project.layout.file(single)
+            }
+        )
         task.targetJarFile.set(project.layout.buildDirectory.file("${project.name}.jar"))
         task.jarFileSize.set(extension.jarFileSize)
         
