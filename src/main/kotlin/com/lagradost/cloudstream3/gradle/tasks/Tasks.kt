@@ -16,6 +16,7 @@ import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.AbstractCompile
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
+import java.util.LinkedList
 
 const val TASK_GROUP = "cloudstream"
 
@@ -34,7 +35,7 @@ fun registerTasks(project: Project) {
                 }
 
             task.pluginEntriesJson.set(JsonBuilder(
-                entries,
+                LinkedList(entries),
                 JsonGenerator.Options().excludeNulls().build()
             ).toPrettyString())
         }
