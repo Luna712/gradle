@@ -101,14 +101,17 @@ fun registerTasks(project: Project) {
         task.group = TASK_GROUP
         task.dependsOn("createFullJarDebug") // Ensure JAR is built before copying
         val jarTask = project.tasks.named("createFullJarDebug")
-        val jarFile = jarTask.outputs.files.singleFile // Output directory of createFullJarDebug
-        extension.jarFileSize = jarFile.length()
 
         task.hasCrossPlatformSupport.set(extension.isCrossPlatform)
         task.pluginClassFile.set(pluginClassFile)
         task.pluginClassName.set(extension.pluginClassName)
-        task.jarInputFile.set(jarFile)
+        task.jarInputFile.set(jarTask.flatMap { it.outputs.files.singleFile })
         task.targetJarFile.set(project.layout.buildDirectory.file("${project.name}.jar"))
+        task.jarFileSize.set(extension.jarFileSize)
+        
+        task.doLast {
+            extension.jarFileSize = task.jarFileSize.orNull ?: 0
+        }
     }
 
     project.tasks.register("ensureJarCompatibility", EnsureJarCompatibilityTask::class.java) { task ->
