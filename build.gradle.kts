@@ -44,8 +44,8 @@ dependencies {
     compileOnly("com.android.tools.build:gradle:8.7.3")
     compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.0")
 
-    implementation("org.ow2.asm:asm:9.4")
-    implementation("org.ow2.asm:asm-tree:9.4")
+    implementation("org.ow2.asm:asm:9.9")
+    implementation("org.ow2.asm:asm-tree:9.9")
     implementation("com.github.vidstige:jadb:master-SNAPSHOT")
 }
 
