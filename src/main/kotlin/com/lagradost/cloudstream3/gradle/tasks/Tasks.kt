@@ -22,12 +22,18 @@ fun registerTasks(project: Project) {
     val intermediates = project.buildDir.resolve("intermediates")
 
     if (project.rootProject.tasks.findByName("makePluginsJson") == null) {
-        project.rootProject.tasks.register("makePluginsJson", MakePluginsJsonTask::class.java) {
-            it.group = TASK_GROUP
-
-            it.outputs.upToDateWhen { false }
-
-            it.outputFile.set(it.project.buildDir.resolve("plugins.json"))
+        project.rootProject.tasks.register("makePluginsJson", MakePluginsJsonTask::class.java) { task ->
+            task.group = TASK_GROUP
+            task.outputs.upToDateWhen { false }
+            task.outputFile.set(task.project.layout.buildDirectory.file("plugins.json"))
+            task.pluginEntriesJson.set(
+                task.project.provider {
+                    val lst = task.project.allprojects.mapNotNull { sub ->
+                        sub.extensions.findCloudstream()?.let { sub.makePluginEntry() }
+                    }
+                    JsonBuilder(lst, JsonGenerator.Options().excludeNulls().build()).toPrettyString()
+                }
+            )
         }
     }
 
@@ -35,28 +41,31 @@ fun registerTasks(project: Project) {
         it.group = TASK_GROUP
     }
 
-    val pluginClassFile = intermediates.resolve("pluginClass")
+    val pluginClassFile = intermediatesDir.map { it.file("pluginClass") }
 
-    val compileDex = project.tasks.register("compileDex", CompileDexTask::class.java) {
-        it.group = TASK_GROUP
+    val compileDex = project.tasks.register("compileDex", CompileDexTask::class.java) { task ->
+        task.group = TASK_GROUP
 
-        it.pluginClassFile.set(pluginClassFile)
+        task.pluginClassFile.set(pluginClassFile)
+        task.outputFile.set(intermediatesDir.map { dir -> dir.file("classes.dex") })
+
+        val android = project.extensions.findByName("android") as? BaseExtension
+            ?: error("Android plugin not found")
+        task.minSdk.set(android.defaultConfig.minSdk ?: 21)
+        task.bootClasspath.from(android.bootClasspath)
+
+        val extension = project.extensions.getCloudstream()
+        task.pluginClassName.set(extension.pluginClassName)
 
         val kotlinTask = project.tasks.findByName("compileDebugKotlin") as KotlinCompile?
         if (kotlinTask != null) {
-            it.dependsOn(kotlinTask)
-            it.input.from(kotlinTask.destinationDirectory)
+            task.dependsOn(kotlinTask)
+            task.input.from(kotlinTask.destinationDirectory)
         }
 
-        // This task does not seem to be required for a successful cs3 file
-
-//        val javacTask = project.tasks.findByName("compileDebugJavaWithJavac") as AbstractCompile?
-//        if (javacTask != null) {
-//            it.dependsOn(javacTask)
-//            it.input.from(javacTask.destinationDirectory)
-//        }
-
-        it.outputFile.set(intermediates.resolve("classes.dex"))
+        task.doLast {
+            extension.pluginClassName = task.pluginClassName.orNull
+        }
     }
 
     val compileResources =
