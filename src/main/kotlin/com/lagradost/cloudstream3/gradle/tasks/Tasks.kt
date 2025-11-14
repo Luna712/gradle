@@ -135,7 +135,7 @@ fun registerTasks(project: Project) {
                 it.dependsOn(compilePluginJar)
             }
 
-            val manifestFile = intermediatesDir.map { it.file("manifest.json") }.get()
+            val manifestFile = intermediatesDir.map { it.file("manifest.json") }
             it.from(manifestFile)
             it.doFirst {
                 if (extension.pluginClassName == null) {
@@ -144,7 +144,7 @@ fun registerTasks(project: Project) {
                     }
                 }
 
-                manifestFile.asFile.writeText(
+                manifestFile.get().asFile.writeText(
                     JsonBuilder(
                         project.makeManifest(),
                         JsonGenerator.Options()
@@ -155,16 +155,14 @@ fun registerTasks(project: Project) {
             }
 
             it.from(compileDexTask.outputFile)
-
-            val zip = it as Zip
             if (extension.requiresResources) {
-                zip.dependsOn(compileResources.get())
+                it.dependsOn(compileResources)
             }
-            zip.isPreserveFileTimestamps = false
-            zip.archiveBaseName.set(project.name)
-            zip.archiveExtension.set("cs3")
-            zip.archiveVersion.set("")
-            zip.destinationDirectory.set(project.layout.buildDirectory)
+            it.isPreserveFileTimestamps = false
+            it.archiveBaseName.set(project.name)
+            it.archiveExtension.set("cs3")
+            it.archiveVersion.set("")
+            it.destinationDirectory.set(project.layout.buildDirectory)
 
             it.doLast { task ->
                 extension.fileSize = task.outputs.files.singleFile.length()
