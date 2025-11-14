@@ -2,6 +2,7 @@ package com.lagradost.cloudstream3.gradle.tasks
 
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.tasks.ProcessLibraryManifest
+import com.lagradost.cloudstream3.gradle.entities.PluginEntry
 import com.lagradost.cloudstream3.gradle.findCloudstream
 import com.lagradost.cloudstream3.gradle.getCloudstream
 import com.lagradost.cloudstream3.gradle.makeManifest
@@ -29,13 +30,14 @@ fun registerTasks(project: Project) {
             task.group = TASK_GROUP
             task.outputs.upToDateWhen { false }
             task.outputFile.set(task.project.layout.buildDirectory.file("plugins.json"))
-            val entries = task.project.allprojects
-                .mapNotNull { sub ->
-                    sub.extensions.findCloudstream()?.let { sub.makePluginEntry() }
-                }
+            val lst = LinkedList<PluginEntry>()
+            for (subproject in task.project.allprojects) {
+                subproject.extensions.findCloudstream() ?: continue
+                lst.add(subproject.makePluginEntry())
+            }
 
             task.pluginEntriesJson.set(JsonBuilder(
-                LinkedList(entries),
+                lst,
                 JsonGenerator.Options().excludeNulls().build()
             ).toPrettyString())
         }
