@@ -2,7 +2,6 @@ package com.lagradost.cloudstream3.gradle.tasks
 
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.tasks.ProcessLibraryManifest
-import com.lagradost.cloudstream3.gradle.entities.PluginEntry
 import com.lagradost.cloudstream3.gradle.findCloudstream
 import com.lagradost.cloudstream3.gradle.getCloudstream
 import com.lagradost.cloudstream3.gradle.makeManifest
@@ -17,7 +16,6 @@ import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.AbstractCompile
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
-import java.util.LinkedList
 
 const val TASK_GROUP = "cloudstream"
 
