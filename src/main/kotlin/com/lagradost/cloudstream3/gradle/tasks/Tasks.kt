@@ -100,6 +100,7 @@ fun registerTasks(project: Project) {
     val compilePluginJar = project.tasks.register("compilePluginJar", CompilePluginJarTask::class.java) { task ->
         task.group = TASK_GROUP
         task.dependsOn("createFullJarDebug") // Ensure JAR is built before copying
+        task.dependsOn("compileDex") // compileDex creates pluginClass
         val jarTask = project.tasks.named("createFullJarDebug")
 
         task.hasCrossPlatformSupport.set(extension.isCrossPlatform)
