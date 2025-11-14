@@ -100,8 +100,7 @@ fun registerTasks(project: Project) {
     val compilePluginJar = project.tasks.register("compilePluginJar", CompilePluginJarTask::class.java) { task ->
         task.group = TASK_GROUP
         task.dependsOn("createFullJarDebug") // Ensure JAR is built before copying
-        val jarTask = project.tasks.findByName("createFullJarDebug") ?:
-            error("createFullJarDebug not found")
+        val jarTask = tasks.named("createFullJarDebug") ?: error("createFullJarDebug not found")
         val jarFile = jarTask.outputs.files.singleFile // Output directory of createFullJarDebug
         extension.jarFileSize = jarFile.length()
 
