@@ -3,6 +3,7 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
@@ -18,6 +19,9 @@ abstract class CompilePluginJarTask : DefaultTask() {
     @get:Input
     @get:Optional
     abstract val pluginClassName: Property<String?>
+
+    @get:Internal
+	abstract val jarFileSize: Property<Long?>
 
     @get:InputFile
     abstract val jarInputFile: RegularFileProperty
@@ -40,6 +44,7 @@ abstract class CompilePluginJarTask : DefaultTask() {
         val targetFile = targetJarFile.get().asFile
 
         jarFile.copyTo(targetFile, overwrite = true)
+        jarFileSize.set(jarFile.length)
         logger.lifecycle("Made Cloudstream cross-platform package at ${targetFile.absolutePath}")
     }
 }
