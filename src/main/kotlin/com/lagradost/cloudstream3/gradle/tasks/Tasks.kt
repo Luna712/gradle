@@ -31,8 +31,8 @@ fun registerTasks(project: Project) {
             task.outputs.upToDateWhen { false }
             task.outputFile.set(task.project.layout.buildDirectory.file("plugins.json"))
             task.pluginEntriesJson.set(
-                project.provider {
-                    val lst = project.rootProject.allprojects.mapNotNull { sub ->
+                task.project.provider {
+                    val lst = task.project.allprojects.mapNotNull { sub ->
                         sub.extensions.findCloudstream()?.let { sub.makePluginEntry() }
                     }
                     JsonBuilder(lst, JsonGenerator.Options().excludeNulls().build()).toPrettyString()
