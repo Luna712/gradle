@@ -44,7 +44,7 @@ abstract class CompilePluginJarTask : DefaultTask() {
         val targetFile = targetJarFile.get().asFile
 
         jarFile.copyTo(targetFile, overwrite = true)
-        jarFileSize.set(jarFile.length)
+        jarFileSize.set(jarFile.length())
         logger.lifecycle("Made Cloudstream cross-platform package at ${targetFile.absolutePath}")
     }
 }
