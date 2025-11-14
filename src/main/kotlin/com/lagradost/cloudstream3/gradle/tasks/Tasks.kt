@@ -129,13 +129,18 @@ fun registerTasks(project: Project) {
 
     project.afterEvaluate {
         val make = project.tasks.register("make", Zip::class.java) {
-            val compileDexTask = compileDex.get()
-            it.dependsOn(compileDexTask)
+            it.dependsOn(compileDex)
             if (extension.isCrossPlatform) {
                 it.dependsOn(compilePluginJar)
             }
 
             val manifestProvider = project.provider {
+                if (extension.pluginClassName == null) {
+                    if (pluginClassFile.get().asFile.exists()) {
+                        extension.pluginClassName = pluginClassFile.get().asFile.readText()
+                    }
+                }
+
                 JsonBuilder(
                     project.makeManifest(),
                     JsonGenerator.Options()
@@ -147,16 +152,10 @@ fun registerTasks(project: Project) {
             val manifestFile = intermediatesDir.map { it.file("manifest.json") }
             it.from(manifestFile)
             it.doFirst {
-                if (extension.pluginClassName == null) {
-                    if (pluginClassFile.get().asFile.exists()) {
-                        extension.pluginClassName = pluginClassFile.get().asFile.readText()
-                    }
-                }
-
                 manifestFile.get().asFile.writeText(manifestProvider.get())
             }
 
-            it.from(compileDexTask.outputFile)
+            it.from(compileDex.get().outputFile)
             if (extension.requiresResources) {
                 it.dependsOn(compileResources)
             }
