@@ -28,7 +28,7 @@ abstract class CompilePluginJarTask : DefaultTask() {
     abstract val targetJarFile: RegularFileProperty
 
     @TaskAction
-    fun build() {
+    fun compileJar() {
         if (pluginClassName.orNull == null) {
             val file = pluginClassFile.get().asFile
             if (file.exists()) {
