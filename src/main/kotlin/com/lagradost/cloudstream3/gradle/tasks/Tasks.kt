@@ -110,7 +110,8 @@ fun registerTasks(project: Project) {
         task.jarFileSize.set(extension.jarFileSize)
         
         task.doLast {
-            extension.jarFileSize = task.jarFileSize.orNull ?: 0
+            extension.pluginClassName = task.pluginClassName.orNull
+            extension.jarFileSize = task.jarFileSize.orNull
         }
     }
 
