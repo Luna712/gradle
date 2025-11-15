@@ -133,7 +133,7 @@ fun registerTasks(project: Project) {
             extension.pluginClassName = pluginClassName
 
             JsonBuilder(
-                project.makeManifest()
+                project.makeManifest(),
                 JsonGenerator.Options().excludeNulls().build()
             ).toString()
         }
