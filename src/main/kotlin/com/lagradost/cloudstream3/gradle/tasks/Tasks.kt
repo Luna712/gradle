@@ -128,48 +128,43 @@ fun registerTasks(project: Project) {
     }
 
     project.afterEvaluate {
-        val make = project.tasks.register("make", Zip::class.java) {
-            it.dependsOn(compileDex)
-            if (extension.isCrossPlatform) {
-                it.dependsOn(compilePluginJar)
+        val manifestProvider = project.provider {
+            val pluginClassName = extension.pluginClassName ?: pluginClassFile.get().asFile.readText()
+            extension.pluginClassName = pluginClassName
+
+            JsonBuilder(
+                project.makeManifest()
+                JsonGenerator.Options().excludeNulls().build()
+            ).toString()
+        }
+
+        val manifestFile = intermediatesDir.map { it.file("manifest.json") }
+
+        val make = project.tasks.register("make", Zip::class.java) { task ->
+            task.group = TASK_GROUP
+            task.dependsOn(compileDex)
+            if (extension.isCrossPlatform) task.dependsOn(compilePluginJar)
+            if (extension.requiresResources) task.dependsOn(compileResources)
+
+            task.doFirst {
+                manifestFile.get().asFile.writeText(manifestProvider.get())
             }
-            
-            val manifestFile = intermediatesDir.map { it.file("manifest.json") }
-            it.from(manifestFile)
 
-            //val manifestProvider = project.provider {
-                if (extension.pluginClassName == null) {
-                    if (pluginClassFile.get().asFile.exists()) {
-                        extension.pluginClassName = pluginClassFile.get().asFile.readText()
-                    }
-                }
+            task.from(manifestFile)
+            task.from(compileDex.get().outputFile)
 
-                manifestFile.get().asFile.writeText(JsonBuilder(
-                    project.makeManifest(),
-                    JsonGenerator.Options()
-                        .excludeNulls()
-                        .build()
-                ).toString())
-            //}
+            task.isPreserveFileTimestamps = false
+            task.archiveBaseName.set(project.name)
+            task.archiveExtension.set("cs3")
+            task.archiveVersion.set("")
+            task.destinationDirectory.set(project.layout.buildDirectory)
 
-            //it.doFirst {
-            //}
-
-            it.from(compileDex.get().outputFile)
-            if (extension.requiresResources) {
-                it.dependsOn(compileResources)
-            }
-            it.isPreserveFileTimestamps = false
-            it.archiveBaseName.set(project.name)
-            it.archiveExtension.set("cs3")
-            it.archiveVersion.set("")
-            it.destinationDirectory.set(project.layout.buildDirectory)
-
-            it.doLast { task ->
+            task.doLast {
                 extension.fileSize = task.outputs.files.singleFile.length()
                 task.logger.lifecycle("Made Cloudstream package at ${task.outputs.files.singleFile}")
             }
         }
+
         project.rootProject.tasks.getByName("makePluginsJson").dependsOn(make)
     }
 
