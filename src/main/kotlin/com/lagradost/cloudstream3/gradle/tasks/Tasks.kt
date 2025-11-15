@@ -133,27 +133,27 @@ fun registerTasks(project: Project) {
             if (extension.isCrossPlatform) {
                 it.dependsOn(compilePluginJar)
             }
+            
+            val manifestFile = intermediatesDir.map { it.file("manifest.json") }
+            it.from(manifestFile)
 
-            val manifestProvider = project.provider {
+            //val manifestProvider = project.provider {
                 if (extension.pluginClassName == null) {
                     if (pluginClassFile.get().asFile.exists()) {
                         extension.pluginClassName = pluginClassFile.get().asFile.readText()
                     }
                 }
 
-                JsonBuilder(
+                manifestFile.get().asFile.writeText(JsonBuilder(
                     project.makeManifest(),
                     JsonGenerator.Options()
                         .excludeNulls()
                         .build()
-                ).toString()
-            }
+                ).toString())
+            //}
 
-            val manifestFile = intermediatesDir.map { it.file("manifest.json") }
-            it.from(manifestFile)
-            it.doFirst {
-                manifestFile.get().asFile.writeText(manifestProvider.get())
-            }
+            //it.doFirst {
+            //}
 
             it.from(compileDex.get().outputFile)
             if (extension.requiresResources) {
