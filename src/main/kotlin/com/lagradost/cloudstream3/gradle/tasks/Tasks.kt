@@ -95,35 +95,22 @@ fun registerTasks(project: Project) {
             }
         }
 
-    val compilePluginJar = project.tasks.register("compilePluginJar") {
-        it.group = TASK_GROUP
-        it.dependsOn("createFullJarDebug") // Ensure JAR is built before copying
+    val compilePluginJar = project.tasks.register("compilePluginJar", CompilePluginJarTask::class.java) { task ->
+        task.group = TASK_GROUP
+        task.dependsOn("createFullJarDebug") // Ensure JAR is built before copying
+        task.dependsOn("compileDex") // compileDex creates pluginClass
+        val jarTask = project.tasks.named("createFullJarDebug")
 
-        it.doFirst {
-            if (extension.pluginClassName == null) {
-                if (pluginClassFile.exists()) {
-                    extension.pluginClassName = pluginClassFile.readText()
-                }
-            }
-        }
-
-        it.doLast {
-            if (!extension.isCrossPlatform) {
-                return@doLast
-            }
-
-            val jarTask = project.tasks.findByName("createFullJarDebug") ?: return@doLast
-            val jarFile =
-                jarTask.outputs.files.singleFile // Output directory of createFullJarDebug
-            if (jarFile != null) {
-                val targetDir = project.buildDir // Top-level build directory
-                val targetFile = targetDir.resolve("${project.name}.jar")
-                jarFile.copyTo(targetFile, overwrite = true)
-                extension.jarFileSize = jarFile.length()
-                it.logger.lifecycle("Made Cloudstream cross-platform package at ${targetFile.absolutePath}")
-            } else {
-                it.logger.warn("Could not find JAR file!")
-            }
+        task.hasCrossPlatformSupport.set(extension.isCrossPlatform)
+        task.pluginClassFile.set(pluginClassFile)
+        task.pluginClassName.set(extension.pluginClassName)
+        task.jarInputFile.fileProvider(jarTask.map { it.outputs.files.singleFile })
+        task.targetJarFile.set(project.layout.buildDirectory.file("${project.name}.jar"))
+        task.jarFileSize.set(extension.jarFileSize)
+        
+        task.doLast {
+            extension.pluginClassName = task.pluginClassName.orNull
+            extension.jarFileSize = task.jarFileSize.orNull
         }
     }
 
