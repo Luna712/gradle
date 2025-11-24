@@ -45,7 +45,7 @@ internal class LibraryExtensionCompat(private val project: Project) {
                     ?: error("LibraryAndroidComponentsExtension not found")
                 var resDir: File? = null
                 libraryComponents.onVariants { variant ->
-                    val dirs = variant.sources.res?.getDirectories()?.files
+                    val dirs = variant.sources.res?.srcDirs?.files
                     if (!dirs.isNullOrEmpty()) resDir = dirs.first()
                 }
                 resDir ?: error("Failed to resolve main resource directory for LibraryExtension")
