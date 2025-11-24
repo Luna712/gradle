@@ -59,8 +59,23 @@ fun registerTasks(project: Project) {
             }
         } ?: error("Android plugin not found")
 
-        task.minSdk.set(android.defaultConfig.minSdk ?: 21)
-        task.bootClasspath.from(android.bootClasspath)
+        val minSdk = when (android) {
+            is BaseExtension -> android.defaultConfig.minSdk ?: 21
+            is com.android.build.api.dsl.LibraryExtension -> android.defaultConfig.minSdk ?: 21
+            else -> 21
+        }
+        task.minSdk.set(minSdk)
+
+        val bootClasspath = when (android) {
+            is BaseExtension -> android.bootClasspath
+            is com.android.build.api.dsl.LibraryExtension -> {
+                project.extensions
+                    .getByType(com.android.build.api.dsl.CommonExtension::class.java)
+                    .bootClasspath
+            }
+            else -> error("Unknown Android extension type")
+        }
+        task.bootClasspath.from(bootClasspath)
 
         val extension = project.extensions.getCloudstream()
         task.pluginClassName.set(extension.pluginClassName)
