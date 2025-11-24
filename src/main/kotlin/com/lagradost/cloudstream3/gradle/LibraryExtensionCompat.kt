@@ -1,0 +1,38 @@
+package com.lagradost.cloudstream3.gradle
+
+import com.android.build.gradle.BaseExtension
+import com.android.build.api.dsl.LibraryExtension
+import com.android.build.api.variant.LibraryAndroidComponentsExtension
+import org.gradle.api.Project
+
+/**
+ * Compatibility layer for AGP 9, maintaining backward compatibility with AGP 8
+ * for Android library modules. Provides access to minSdk and bootClasspath
+ * in a way that works across both versions.
+ *
+ * This class can be removed once support for AGP 8 is no longer required.
+ */
+internal class LibraryExtensionCompat(private val project: Project) {
+
+    val android: Any
+        get() = project.extensions.findByName("android")
+            ?: error("Android plugin not found")
+
+    val minSdk: Int
+        get() = when (android) {
+            is BaseExtension -> android.defaultConfig.minSdk ?: 21
+            is LibraryExtension -> android.defaultConfig.minSdk ?: 21
+            else -> error("Android plugin found, but it's not a library module")
+        }
+
+    val bootClasspath: Any
+        get() = when (android) {
+            is BaseExtension -> android.bootClasspath
+            is LibraryExtension -> project.extensions
+                .findByType(LibraryAndroidComponentsExtension::class.java)
+                ?.sdkComponents
+                ?.bootClasspath
+                ?: error("LibraryAndroidComponentsExtension not found")
+            else -> error("Unknown Android extension type")
+        }
+}
