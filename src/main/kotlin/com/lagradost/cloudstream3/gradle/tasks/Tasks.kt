@@ -51,8 +51,14 @@ fun registerTasks(project: Project) {
         task.pluginClassFile.set(pluginClassFile)
         task.outputFile.set(intermediatesDir.map { dir -> dir.file("classes.dex") })
 
-        val android = project.extensions.findByName("android") as? BaseExtension
-            ?: error("Android plugin not found")
+        val android = project.extensions.findByName("android")?.let {
+            when (it) {
+                is BaseExtension -> it
+                is com.android.build.api.dsl.LibraryExtension -> it
+                else -> error("Android plugin found, but it's not a library module")
+            }
+        } ?: error("Android plugin not found")
+
         task.minSdk.set(android.defaultConfig.minSdk ?: 21)
         task.bootClasspath.from(android.bootClasspath)
 
