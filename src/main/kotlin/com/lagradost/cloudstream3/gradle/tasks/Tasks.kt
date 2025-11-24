@@ -1,6 +1,5 @@
 package com.lagradost.cloudstream3.gradle.tasks
 
-import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.tasks.ProcessLibraryManifest
 import com.lagradost.cloudstream3.gradle.LibraryExtensionCompat
 import com.lagradost.cloudstream3.gradle.findCloudstream
@@ -78,10 +77,10 @@ fun registerTasks(project: Project) {
                 project.tasks.getByName("processDebugManifest") as ProcessLibraryManifest
             it.dependsOn(processManifestTask)
 
-            val android = project.extensions.getByName("android") as BaseExtension
-            it.input.set(android.sourceSets.getByName("main").res.srcDirs.single())
-            it.manifestFile.set(processManifestTask.manifestOutputFile)
+            val android = LibraryExtensionCompat(project)
+            it.input.set(android.mainResSrcDir)
 
+            it.manifestFile.set(processManifestTask.manifestOutputFile)
             it.outputFile.set(intermediatesDir.map { it.file("res.apk") })
 
             it.doLast { _ ->
