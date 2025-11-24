@@ -69,9 +69,9 @@ fun registerTasks(project: Project) {
         val bootClasspath = when (android) {
             is BaseExtension -> android.bootClasspath
             is com.android.build.api.dsl.LibraryExtension -> {
-                project.extensions
-                    .getByType(com.android.build.api.dsl.CommonExtension::class.java)
-                    .bootClasspath
+                val libraryComponents = project.extensions.findByType(com.android.build.api.variant.LibraryAndroidComponentsExtension::class.java)
+                    ?: error("LibraryAndroidComponentsExtension not found")
+                libraryComponents.sdkComponents.bootClasspath.files.map { it.toPath() }
             }
             else -> error("Unknown Android extension type")
         }
