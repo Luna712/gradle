@@ -15,9 +15,8 @@ import java.io.File
  */
 internal class LibraryExtensionCompat(private val project: Project) {
 
-    private val android: Any
-        get() = project.extensions.findByName("android")
-            ?: error("Android plugin not found")
+    private val android = project.extensions.findByName("android")
+        ?: error("Android plugin not found")
 
     val minSdk: Int
         get() = when (android) {
