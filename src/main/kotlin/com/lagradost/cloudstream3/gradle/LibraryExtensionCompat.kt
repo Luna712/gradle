@@ -39,7 +39,17 @@ internal class LibraryExtensionCompat(private val project: Project) {
     val mainResSrcDir: File
         get() = when (android) {
             is BaseExtension -> android.sourceSets.getByName("main").res.srcDirs.single()
-            is LibraryExtension -> android.sourceSets.getByName("main").res.srcDirs("src/main/res").single()
+            is LibraryExtension -> {
+                val libraryComponents = project.extensions
+                    .findByType(LibraryAndroidComponentsExtension::class.java)
+                    ?: error("LibraryAndroidComponentsExtension not found")
+                var resDir: File? = null
+                libraryComponents.onVariants { variant ->
+                    val dirs = variant.sources.res?.getDirectories()?.files
+                    if (!dirs.isNullOrEmpty()) resDir = dirs.first()
+                }
+                resDir ?: error("Failed to resolve main resource directory for LibraryExtension")
+            }
             else -> error("Unknown Android extension type")
         }
 }
