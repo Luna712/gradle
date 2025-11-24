@@ -46,7 +46,7 @@ internal class LibraryExtensionCompat(private val project: Project) {
 
                 var dir: File? = null
                 libraryComponents.onVariants { variant ->
-                    val resSources = variant.sources.res.source.srcDirs.single()
+                    val resSources = variant.sources.res.srcDirs.single()
                     if (resSources != null) {
                         val files = resSources.asFileTree.files
                         if (files.isNotEmpty()) dir = files.first()
