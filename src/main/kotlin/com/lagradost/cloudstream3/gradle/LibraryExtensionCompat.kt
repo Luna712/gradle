@@ -32,7 +32,7 @@ internal class LibraryExtensionCompat(private val project: Project) {
             else -> error("Android plugin found, but it's not a library module")
         }
 
-    val buildToolsVersion: Int
+    val buildToolsVersion: String
         get() = when (android) {
             is BaseExtension -> android.buildToolsVersion
             is LibraryExtension -> android.buildToolsVersion
