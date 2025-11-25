@@ -1,7 +1,7 @@
 package com.lagradost.cloudstream3.gradle.tasks
 
-import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.tasks.ProcessLibraryManifest
+import com.lagradost.cloudstream3.gradle.LibraryExtensionCompat
 import com.lagradost.cloudstream3.gradle.findCloudstream
 import com.lagradost.cloudstream3.gradle.getCloudstream
 import com.lagradost.cloudstream3.gradle.makeManifest
@@ -51,31 +51,9 @@ fun registerTasks(project: Project) {
         task.pluginClassFile.set(pluginClassFile)
         task.outputFile.set(intermediatesDir.map { dir -> dir.file("classes.dex") })
 
-        val android = project.extensions.findByName("android")?.let {
-            when (it) {
-                is BaseExtension -> it
-                is com.android.build.api.dsl.LibraryExtension -> it
-                else -> error("Android plugin found, but it's not a library module")
-            }
-        } ?: error("Android plugin not found")
-
-        val minSdk = when (android) {
-            is BaseExtension -> android.defaultConfig.minSdk ?: 21
-            is com.android.build.api.dsl.LibraryExtension -> android.defaultConfig.minSdk ?: 21
-            else -> 21
-        }
-        task.minSdk.set(minSdk)
-
-        val bootClasspath = when (android) {
-            is BaseExtension -> android.bootClasspath
-            is com.android.build.api.dsl.LibraryExtension -> {
-                val libraryComponents = project.extensions.findByType(com.android.build.api.variant.LibraryAndroidComponentsExtension::class.java)
-                    ?: error("LibraryAndroidComponentsExtension not found")
-                libraryComponents.sdkComponents.bootClasspath
-            }
-            else -> error("Unknown Android extension type")
-        }
-        task.bootClasspath.from(bootClasspath)
+        val android = LibraryExtensionCompat(project)
+        task.minSdk.set(android.minSdk)
+        task.bootClasspath.from(android.bootClasspath)
 
         val extension = project.extensions.getCloudstream()
         task.pluginClassName.set(extension.pluginClassName)
@@ -99,10 +77,10 @@ fun registerTasks(project: Project) {
                 project.tasks.getByName("processDebugManifest") as ProcessLibraryManifest
             it.dependsOn(processManifestTask)
 
-            val android = project.extensions.getByName("android") as BaseExtension
-            it.input.set(android.sourceSets.getByName("main").res.srcDirs.single())
-            it.manifestFile.set(processManifestTask.manifestOutputFile)
+            val android = LibraryExtensionCompat(project)
+            it.input.set(android.mainResSrcDir)
 
+            it.manifestFile.set(processManifestTask.manifestOutputFile)
             it.outputFile.set(intermediatesDir.map { it.file("res.apk") })
 
             it.doLast { _ ->
