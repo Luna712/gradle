@@ -42,12 +42,14 @@ internal class LibraryExtensionCompat(private val project: Project) {
             is LibraryExtension -> {
                 val libraryComponents = project.extensions
                     .findByType(LibraryAndroidComponentsExtension::class.java)
-                    ?: error("LibraryAndroidComponentsExtension not found")
+                ?: error("LibraryAndroidComponentsExtension not found")
 
                 var dir: File? = null
                 libraryComponents.onVariants { variant ->
-                    dir = variant.sources.res?.static?.get().map { res ->
-                        res.flatten().map { it.asFile }
+                    val resDirsProvider = variant.sources.res?.static
+                    if (resDirsProvider != null) {
+                        val files = resDirsProvider.get().flatten().map { it.asFile }
+                        dir = files.firstOrNull()
                     }
                 }
 
