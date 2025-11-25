@@ -21,7 +21,7 @@ internal class LibraryExtensionCompat(private val project: Project) {
     val compileSdk: String
         get() = when (android) {
             is BaseExtension -> android.compileSdkVersion ?: error("compileSdkVersion not found")
-            is LibraryExtension -> android.compileSdkVersion ?: error("compileSdk not found")
+            is LibraryExtension -> android.compileSdk?.toString() ?: error("compileSdk not found")
             else -> error("Android plugin found, but it's not a library module")
         }
 
