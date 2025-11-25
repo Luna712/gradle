@@ -8,15 +8,22 @@ import java.io.File
 
 /**
  * Compatibility layer for AGP 9, maintaining backward compatibility with AGP 8
- * for Android library modules. Provides access to minSdk, bootClasspath,
- * and the main res source directory in a way that works across both versions.
+ * for Android library modules. Provides access to necessary properties,
+ * in a way that works across both versions.
  *
- * This class can be removed once support for AGP 8 is no longer required.
+ * Support for BaseExtension can be removed once support for AGP 8 is no longer required.
  */
 internal class LibraryExtensionCompat(private val project: Project) {
 
     private val android = project.extensions.findByName("android")
         ?: error("Android plugin not found")
+
+    val compileSdk: String
+        get() = when (android) {
+            is BaseExtension -> android.compileSdkVersion ?: error("compileSdkVersion not found")
+            is LibraryExtension -> android.compileSdk?.toString() ?: error("compileSdk not found")
+            else -> error("Android plugin found, but it's not a library module")
+        }
 
     val minSdk: Int
         get() = when (android) {
@@ -25,14 +32,41 @@ internal class LibraryExtensionCompat(private val project: Project) {
             else -> error("Android plugin found, but it's not a library module")
         }
 
+    val buildToolsVersion: String
+        get() = when (android) {
+            is BaseExtension -> android.buildToolsVersion
+            is LibraryExtension -> android.buildToolsVersion
+            else -> error("Android plugin found, but it's not a library module")
+        }
+
+    val adb: File
+        get() = when (android) {
+            is BaseExtension -> android.adbExecutable
+            is LibraryExtension -> project.extensions
+                .findByType(LibraryAndroidComponentsExtension::class.java)
+                ?.sdkComponents
+                ?.adb?.get()?.asFile ?: error("LibraryAndroidComponentsExtension not found")
+            else -> error("Unknown Android extension type")
+        }
+
     val bootClasspath: Any
         get() = when (android) {
             is BaseExtension -> android.bootClasspath
             is LibraryExtension -> project.extensions
                 .findByType(LibraryAndroidComponentsExtension::class.java)
                 ?.sdkComponents
-                ?.bootClasspath
-                ?: error("LibraryAndroidComponentsExtension not found")
+                ?.bootClasspath ?: error("LibraryAndroidComponentsExtension not found")
+            else -> error("Unknown Android extension type")
+        }
+
+    val sdkDirectory: File
+        get() = when (android) {
+            is BaseExtension -> android.sdkDirectory
+            is LibraryExtension -> project.extensions
+                .findByType(LibraryAndroidComponentsExtension::class.java)
+                ?.sdkComponents
+                ?.sdkDirectory
+                ?.get()?.asFile ?: error("LibraryAndroidComponentsExtension not found")
             else -> error("Unknown Android extension type")
         }
 
