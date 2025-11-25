@@ -8,10 +8,10 @@ import java.io.File
 
 /**
  * Compatibility layer for AGP 9, maintaining backward compatibility with AGP 8
- * for Android library modules. Provides access to minSdk, bootClasspath,
- * and the main res source directory in a way that works across both versions.
+ * for Android library modules. Provides access to necessary properties,
+ * in a way that works across both versions.
  *
- * This class can be removed once support for AGP 8 is no longer required.
+ * Support for BaseExtension can be removed once support for AGP 8 is no longer required.
  */
 internal class LibraryExtensionCompat(private val project: Project) {
 
