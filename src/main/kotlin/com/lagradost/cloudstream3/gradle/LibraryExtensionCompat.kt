@@ -50,13 +50,13 @@ internal class LibraryExtensionCompat(private val project: Project) {
             else -> error("Unknown Android extension type")
         }
 
-    val sdkDirectory: Any
+    val sdkDirectory: File
         get() = when (android) {
             is BaseExtension -> android.sdkDirectory
             is LibraryExtension -> project.extensions
                 .findByType(LibraryAndroidComponentsExtension::class.java)
                 ?.sdkComponents
-                ?.sdkDirectory
+                ?.sdkDirectory.get().asFile
                 ?: error("LibraryAndroidComponentsExtension not found")
             else -> error("Unknown Android extension type")
         }
