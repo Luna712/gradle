@@ -1,7 +1,7 @@
 package com.lagradost.cloudstream3.gradle.tasks
 
+import com.lagradost.cloudstream3.gradle.LibraryExtensionCompat
 import com.lagradost.cloudstream3.gradle.getCloudstream
-import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.internal.errors.MessageReceiverImpl
 import com.android.build.gradle.options.SyncOptions.ErrorFormatMode
 import com.android.builder.dexing.ClassFileInputs
@@ -35,9 +35,8 @@ abstract class CompileDexTask : DefaultTask() {
 
     @TaskAction
     fun compileDex() {
-        val android = project.extensions.getByName("android") as BaseExtension
-
-        val minSdk = android.defaultConfig.minSdk ?: 21
+        val android = LibraryExtensionCompat(project)
+        val minSdk = android.minSdk
 
         val dexOutputDir = outputFile.get().asFile.parentFile
 
