@@ -39,6 +39,16 @@ internal class LibraryExtensionCompat(private val project: Project) {
             else -> error("Android plugin found, but it's not a library module")
         }
 
+    val adb: File
+        get() = when (android) {
+            is BaseExtension -> android.adbExecutable
+            is LibraryExtension -> project.extensions
+                .findByType(LibraryAndroidComponentsExtension::class.java)
+                ?.sdkComponents
+                ?.adb?.get()?.asFile ?: error("LibraryAndroidComponentsExtension not found")
+            else -> error("Unknown Android extension type")
+        }
+
     val bootClasspath: Any
         get() = when (android) {
             is BaseExtension -> android.bootClasspath
