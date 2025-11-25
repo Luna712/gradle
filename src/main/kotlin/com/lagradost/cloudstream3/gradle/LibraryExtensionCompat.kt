@@ -46,8 +46,8 @@ internal class LibraryExtensionCompat(private val project: Project) {
 
                 var dir: File? = null
                 libraryComponents.onVariants { variant ->
-                    dir = variant.sources.res?.static?.map { res ->
-                        res.flatten().map { it.asFile }.get().single()
+                    dir = variant.sources.res?.static?.get().map { res ->
+                        res.flatten().map { it.asFile }
                     }
                 }
 
