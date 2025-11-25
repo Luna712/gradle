@@ -32,6 +32,13 @@ internal class LibraryExtensionCompat(private val project: Project) {
             else -> error("Android plugin found, but it's not a library module")
         }
 
+    val buildToolsVersion: Int
+        get() = when (android) {
+            is BaseExtension -> android.buildToolsVersion
+            is LibraryExtension -> android.buildToolsVersion
+            else -> error("Android plugin found, but it's not a library module")
+        }
+
     val bootClasspath: Any
         get() = when (android) {
             is BaseExtension -> android.bootClasspath
@@ -39,6 +46,17 @@ internal class LibraryExtensionCompat(private val project: Project) {
                 .findByType(LibraryAndroidComponentsExtension::class.java)
                 ?.sdkComponents
                 ?.bootClasspath
+                ?: error("LibraryAndroidComponentsExtension not found")
+            else -> error("Unknown Android extension type")
+        }
+
+    val sdkDirectory: Any
+        get() = when (android) {
+            is BaseExtension -> android.sdkDirectory
+            is LibraryExtension -> project.extensions
+                .findByType(LibraryAndroidComponentsExtension::class.java)
+                ?.sdkComponents
+                ?.sdkDirectory
                 ?: error("LibraryAndroidComponentsExtension not found")
             else -> error("Unknown Android extension type")
         }
