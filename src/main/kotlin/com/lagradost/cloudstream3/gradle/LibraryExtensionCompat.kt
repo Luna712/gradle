@@ -49,7 +49,7 @@ internal class LibraryExtensionCompat(private val project: Project) {
             else -> error("Unknown Android extension type")
         }
 
-    val bootClasspath: File
+    val bootClasspath: Any
         get() = when (android) {
             is BaseExtension -> android.bootClasspath
             is LibraryExtension -> project.extensions
