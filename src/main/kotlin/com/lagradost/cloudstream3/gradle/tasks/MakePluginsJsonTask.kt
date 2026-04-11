@@ -1,9 +1,5 @@
 package com.lagradost.cloudstream3.gradle.tasks
 
-import com.lagradost.cloudstream3.gradle.entities.PluginEntry
-import com.lagradost.cloudstream3.gradle.makePluginEntry
-import groovy.json.JsonBuilder
-import groovy.json.JsonGenerator
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
@@ -12,7 +8,6 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
-import java.io.File
 
 abstract class MakePluginsJsonTask : DefaultTask() {
 
