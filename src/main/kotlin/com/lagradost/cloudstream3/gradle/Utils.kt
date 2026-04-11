@@ -32,7 +32,7 @@ fun Project.makePluginEntry(): PluginEntry {
     val cs3File = this.layout.buildDirectory.file("${this.name}.cs3").get().asFile
     val jarFile = this.layout.buildDirectory.file("${this.name}.jar").get().asFile
 
-    val jarFileSize = jarFile.takeIf { it.exists() }?.length()
+    val jarSize = jarFile.takeIf { it.exists() }?.length()
 
     return PluginEntry(
         url = (if (repo == null) "" else repo.getRawLink("${this.name}.cs3", extension.buildBranch)),
@@ -48,9 +48,9 @@ fun Project.makePluginEntry(): PluginEntry {
         apiVersion = extension.apiVersion,
         tvTypes = extension.tvTypes,
         fileSize = cs3File.takeIf { it.exists() }?.length(),
-        jarFileSize = jarFileSize,
+        jarFileSize = jarSize,
         jarUrl = (
-                if (repo == null || jarFileSize == null) null else repo.getRawLink("${this.name}.jar", extension.buildBranch)
+                if (repo == null || jarSize == null) null else repo.getRawLink("${this.name}.jar", extension.buildBranch)
         ),
         jarHash = jarFile.takeIf { it.exists() }?.let { sha256(it) },
         fileHash = cs3File.takeIf { it.exists() }?.let { sha256(it) }
