@@ -124,8 +124,8 @@ fun registerTasks(project: Project) {
         }
     }
 
-    compilePluginJar.configure {
-        it.finalizedBy("ensureJarCompatibility")
+    compilePluginJar.configure { task ->
+        task.finalizedBy("ensureJarCompatibility")
     }
 
     project.tasks.register("ensureJarCompatibility", EnsureJarCompatibilityTask::class.java) { task ->
@@ -192,8 +192,8 @@ fun registerTasks(project: Project) {
         }
     }
 
-    project.rootProject.tasks.named("makePluginsJson").configure {
-        it.dependsOn(make)
+    project.rootProject.tasks.named("makePluginsJson").configure { task ->
+        task.dependsOn(make)
     }
 
     project.tasks.register("cleanCache", CleanCacheTask::class.java) { task ->
