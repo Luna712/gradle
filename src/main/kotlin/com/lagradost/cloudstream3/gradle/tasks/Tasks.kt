@@ -22,7 +22,7 @@ fun registerTasks(project: Project) {
     if (project.rootProject.tasks.findByName("makePluginsJson") == null) {
         project.rootProject.tasks.register("makePluginsJson", MakePluginsJsonTask::class.java) { task ->
             task.group = TASK_GROUP
-            val pluginProjects = project.subprojects.filter {
+            val pluginProjects = task.project.subprojects.filter {
                 it.extensions.findCloudstream() != null
             }
 
@@ -33,7 +33,7 @@ fun registerTasks(project: Project) {
             )
 
             task.outputFile.set(
-                project.layout.buildDirectory.file("plugins.json")
+                task.project.layout.buildDirectory.file("plugins.json")
             )
         }
     }
