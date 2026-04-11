@@ -171,14 +171,14 @@ fun registerTasks(project: Project) {
     if (project.rootProject.tasks.findByName("makePluginsJson") == null) {
         project.rootProject.tasks.register("makePluginsJson", MakePluginsJsonTask::class.java) { task ->
             task.group = TASK_GROUP
-            task.dependsOn(task.project.allprojects.map { sub ->
-                sub.tasks.findByName("make")
+            task.dependsOn(task.project.subprojects.map { sub ->
+                sub.tasks.named("make")
             })
 
-            task.cs3Files.from(task.project.allprojects.map { sub ->
+            task.cs3Files.from(task.project.subprojects.map { sub ->
                 sub.layout.buildDirectory.file("${sub.name}.cs3")
             } )
-            task.jarFiles.from(task.project.allprojects.map { sub ->
+            task.jarFiles.from(task.project.subprojects.map { sub ->
                 sub.layout.buildDirectory.file("${sub.name}.jar")
             })
 
@@ -186,7 +186,7 @@ fun registerTasks(project: Project) {
             task.outputFile.set(task.project.layout.buildDirectory.file("plugins.json"))
             task.entriesJson.set(
                 task.project.provider {
-                    val lst = task.project.allprojects.mapNotNull { sub ->
+                    val lst = task.project.subprojects.mapNotNull { sub ->
                         sub.extensions.findCloudstream()?.let { sub.makePluginEntry() }
                     }
                     JsonBuilder(lst, JsonGenerator.Options().excludeNulls().build()).toPrettyString()
