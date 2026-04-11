@@ -33,9 +33,9 @@ fun registerTasks(project: Project) {
                 }
             )
 
-            task.notCompatibleWithConfigurationCache(
+            /*task.notCompatibleWithConfigurationCache(
                 "Build uses dynamic task graph and runtime mutation of extension state"
-            )
+            )*/
         }
     }
 
