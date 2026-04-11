@@ -22,22 +22,18 @@ fun registerTasks(project: Project) {
     if (project.rootProject.tasks.findByName("makePluginsJson") == null) {
         project.rootProject.tasks.register("makePluginsJson", MakePluginsJsonTask::class.java) { task ->
             task.group = TASK_GROUP
-            task.cs3Files.from(task.project.subprojects.map { sub ->
-                sub.layout.buildDirectory.file("${sub.name}.cs3")
-            } )
-            task.jarFiles.from(task.project.subprojects.map { sub ->
-                sub.layout.buildDirectory.file("${sub.name}.jar")
-            })
+            val pluginProjects = project.subprojects.filter {
+                it.extensions.findCloudstream() != null
+            }
 
-            task.outputs.upToDateWhen { false }
-            task.outputFile.set(task.project.layout.buildDirectory.file("plugins.json"))
-            task.entriesJson.set(
-                task.project.provider {
-                    val lst = task.project.subprojects.mapNotNull { sub ->
-                        sub.extensions.findCloudstream()?.let { sub.makePluginEntry() }
-                    }
-                    JsonBuilder(lst, JsonGenerator.Options().excludeNulls().build()).toPrettyString()
+            task.entries.from(
+                pluginProjects.map {
+                    it.layout.buildDirectory.file("intermediates/pluginEntry.json")
                 }
+            )
+
+            task.outputFile.set(
+                project.layout.buildDirectory.file("plugins.json")
             )
         }
     }
@@ -191,8 +187,28 @@ fun registerTasks(project: Project) {
         }
     }
 
-    project.rootProject.tasks.named("makePluginsJson").configure { task ->
+    make.configure { task ->
+        task.finalizedBy("generatePluginEntry")
+    }
+
+    val generatePluginEntry = project.tasks.register("generatePluginEntry", GeneratePluginEntryTask::class.java) { task ->
+        task.group = TASK_GROUP
         task.dependsOn(make)
+        val entry = project.makePluginEntry()
+        task.entryJson.set(
+            JsonBuilder(
+                entry,
+                JsonGenerator.Options().excludeNulls().build()
+            ).toPrettyString()
+        )
+
+        task.outputFile.set(
+            project.layout.buildDirectory.file("intermediates/pluginEntry.json")
+        )
+    }
+
+    project.rootProject.tasks.named("makePluginsJson").configure { task ->
+        task.dependsOn(generatePluginEntry)
     }
 
     project.tasks.register("cleanCache", CleanCacheTask::class.java) { task ->
