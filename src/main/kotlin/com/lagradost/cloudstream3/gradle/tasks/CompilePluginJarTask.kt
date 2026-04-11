@@ -21,10 +21,10 @@ abstract class CompilePluginJarTask : DefaultTask() {
     @get:Internal
     abstract val pluginClassName: Property<String?>
 
-    @get:Internal
+    @get:Input
 	abstract val jarFileSize: Property<Long?>
 
-    @get:Internal
+    @get:Input
 	abstract val jarHash: Property<String?>
 
     @get:InputFile
@@ -51,6 +51,6 @@ abstract class CompilePluginJarTask : DefaultTask() {
         jarFileSize.set(jarFile.length())
 
         jarHash.set(sha256(jarFile))
-        logger.lifecycle("Made Cloudstream cross-platform package at ${targetFile.absolutePath}")
+        logger.lifecycle("Made CloudStream cross-platform package at ${targetFile.absolutePath}")
     }
 }
