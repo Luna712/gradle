@@ -34,7 +34,7 @@ fun registerTasks(project: Project) {
             )
 
             task.notCompatibleWithConfigurationCache(
-                "Build uses dynamic task graph and runtime mutation of extension state"
+                "Dynamic data (hash, fileSize, etc...) does not get added to plugins.json with configuration cache."
             )
         }
     }
