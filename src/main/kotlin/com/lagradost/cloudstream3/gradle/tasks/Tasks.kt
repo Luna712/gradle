@@ -22,7 +22,6 @@ fun registerTasks(project: Project) {
     if (project.rootProject.tasks.findByName("makePluginsJson") == null) {
         project.rootProject.tasks.register("makePluginsJson", MakePluginsJsonTask::class.java) { task ->
             task.group = TASK_GROUP
-            task.dependsOn("make")
             task.outputs.upToDateWhen { false }
             task.outputFile.set(task.project.layout.buildDirectory.file("plugins.json"))
             task.pluginEntriesJson.set(
@@ -126,6 +125,7 @@ fun registerTasks(project: Project) {
     val compilePluginJar = project.tasks.register("compilePluginJar", CompilePluginJarTask::class.java) { task ->
         task.group = TASK_GROUP
         task.dependsOn(compileDex) // compileDex creates pluginClass
+        task.finalizedBy("ensureJarCompatibility")
 
         val jarTask = project.tasks.named("createFullJarDebug")
         task.dependsOn(jarTask) // Ensure JAR is built before copying
@@ -143,10 +143,6 @@ fun registerTasks(project: Project) {
             /* extension.jarFileSize = task.jarFileSize.orNull
             extension.jarHash = task.jarHash.orNull */
         }
-    }
-
-    compilePluginJar.configure { task ->
-        task.finalizedBy("ensureJarCompatibility")
     }
 
     project.tasks.register("ensureJarCompatibility", EnsureJarCompatibilityTask::class.java) { task ->
@@ -214,7 +210,11 @@ fun registerTasks(project: Project) {
     }
 
     project.rootProject.tasks.named("makePluginsJson").configure { task ->
-        task.dependsOn(make)
+        task.dependsOn(
+            project.rootProject.allprojects.mapNotNull { sub ->
+                sub.tasks.findByName("make")
+            }
+        )
     }
     // project.rootProject.tasks.getByName("makePluginsJson").dependsOn(make)
 
