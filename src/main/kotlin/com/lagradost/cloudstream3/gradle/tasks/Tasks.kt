@@ -24,12 +24,53 @@ fun registerTasks(project: Project) {
             task.group = TASK_GROUP
             task.outputs.upToDateWhen { false }
             task.outputFile.set(task.project.layout.buildDirectory.file("plugins.json"))
-            task.pluginEntriesJson.set(
+            /*task.pluginEntriesJson.set(
                 task.project.provider {
                     val lst = task.project.allprojects.mapNotNull { sub ->
+                        val pluginJarTask = sub.tasks.findByName("compilePluginJar") as? CompilePluginJarTask
+                        val fileSize = pluginJarTask?.jarFileSize?.orNull
+                        val jarHash = pluginJarTask?.jarHash?.orNull
+
+                        sub.extensions.findCloudstream()?.let {
+                            sub.makePluginEntry().copy(
+                                fileSize = fileSize,
+                                jarFileSize = fileSize,
+                                jarHash = jarHash
+                            )
+                        }
                         sub.extensions.findCloudstream()?.let { sub.makePluginEntry() }
                     }
                     JsonBuilder(lst, JsonGenerator.Options().excludeNulls().build()).toPrettyString()
+                }
+            ) */
+            task.pluginEntriesJson.set(
+                task.project.provider {
+                    task.project.allprojects.mapNotNull { sub ->
+                        val extension = sub.extensions.findCloudstream()
+
+                        val makeTask = sub.tasks.findByName("make") as? Zip
+                        val jarTask = sub.tasks.findByName("compilePluginJar") as? CompilePluginJarTask
+
+                        val cs3File = makeTask?.outputs?.files?.singleFile
+                        val jarFile = jarTask?.jarInputFile?.orNull?.asFile
+
+                        val fileSize = cs3File?.length()
+                        val fileHash = cs3File?.let { sha256(it) }
+
+                        val jarSize = jarFile?.length()
+                        val jarHash = jarTask?.jarHash?.orNull
+
+                        extension?.let {
+                            sub.makePluginEntry().copy(
+                                fileSize = fileSize,
+                                fileHash = fileHash,
+                                jarFileSize = jarSize,
+                                jarHash = jarHash
+                            )
+                        }
+                    }.let {
+                        JsonBuilder(it, JsonGenerator.Options().excludeNulls().build()).toPrettyString()
+                    }
                 }
             )
 
@@ -119,8 +160,8 @@ fun registerTasks(project: Project) {
 
         task.doLast {
             extension.pluginClassName = task.pluginClassName.orNull
-            extension.jarFileSize = task.jarFileSize.orNull
-            extension.jarHash = task.jarHash.orNull
+            /* extension.jarFileSize = task.jarFileSize.orNull
+            extension.jarHash = task.jarHash.orNull */
         }
     }
 
@@ -186,8 +227,8 @@ fun registerTasks(project: Project) {
         task.destinationDirectory.set(project.layout.buildDirectory)
 
         task.doLast {
-            extension.fileSize = task.outputs.files.singleFile.length()
-            extension.fileHash = sha256(task.outputs.files.singleFile)
+            /* extension.fileSize = task.outputs.files.singleFile.length()
+            extension.fileHash = sha256(task.outputs.files.singleFile) */
             task.logger.lifecycle("Made CloudStream package at ${task.outputs.files.singleFile}")
         }
     }
