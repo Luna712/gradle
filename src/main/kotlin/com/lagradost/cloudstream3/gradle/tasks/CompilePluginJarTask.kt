@@ -7,7 +7,6 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
@@ -22,12 +21,10 @@ abstract class CompilePluginJarTask : DefaultTask() {
     @get:Internal
     abstract val pluginClassName: Property<String?>
 
-    @get:Input
-    @get:Optional
+    @get:Internal
 	abstract val jarFileSize: Property<Long?>
 
-    @get:Input
-    @get:Optional
+    @get:Internal
 	abstract val jarHash: Property<String?>
 
     @get:InputFile
