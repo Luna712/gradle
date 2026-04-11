@@ -27,17 +27,6 @@ fun registerTasks(project: Project) {
             /*task.pluginEntriesJson.set(
                 task.project.provider {
                     val lst = task.project.allprojects.mapNotNull { sub ->
-                        val pluginJarTask = sub.tasks.findByName("compilePluginJar") as? CompilePluginJarTask
-                        val fileSize = pluginJarTask?.jarFileSize?.orNull
-                        val jarHash = pluginJarTask?.jarHash?.orNull
-
-                        sub.extensions.findCloudstream()?.let {
-                            sub.makePluginEntry().copy(
-                                fileSize = fileSize,
-                                jarFileSize = fileSize,
-                                jarHash = jarHash
-                            )
-                        }
                         sub.extensions.findCloudstream()?.let { sub.makePluginEntry() }
                     }
                     JsonBuilder(lst, JsonGenerator.Options().excludeNulls().build()).toPrettyString()
@@ -46,28 +35,18 @@ fun registerTasks(project: Project) {
             task.pluginEntriesJson.set(
                 task.project.provider {
                     task.project.allprojects.mapNotNull { sub ->
-                        val extension = sub.extensions.findCloudstream()
+                        sub.extensions.findCloudstream() ?: return@mapNotNull null
 
-                        val makeTask = sub.tasks.findByName("make") as? Zip
-                        val jarTask = sub.tasks.findByName("compilePluginJar") as? CompilePluginJarTask
+                        val cs3File = sub.layout.buildDirectory.file("${sub.name}.cs3").get().asFile
+                        val jarFile = sub.layout.buildDirectory.file("${sub.name}.jar").get().asFile
 
-                        val cs3File = makeTask?.outputs?.files?.singleFile
-                        val jarFile = jarTask?.jarInputFile?.orNull?.asFile
+                        sub.makePluginEntry().copy(
+                            fileSize = cs3File.takeIf { it.exists() }?.length(),
+                            fileHash = cs3File.takeIf { it.exists() }?.let { sha256(it) },
 
-                        val fileSize = cs3File?.length()
-                        val fileHash = cs3File?.let { sha256(it) }
-
-                        val jarSize = jarFile?.length()
-                        val jarHash = jarTask?.jarHash?.orNull
-
-                        extension?.let {
-                            sub.makePluginEntry().copy(
-                                fileSize = fileSize,
-                                fileHash = fileHash,
-                                jarFileSize = jarSize,
-                                jarHash = jarHash
-                            )
-                        }
+                            jarFileSize = jarFile.takeIf { it.exists() }?.length(),
+                            jarHash = jarFile.takeIf { it.exists() }?.let { sha256(it) }
+                        )
                     }.let {
                         JsonBuilder(it, JsonGenerator.Options().excludeNulls().build()).toPrettyString()
                     }
