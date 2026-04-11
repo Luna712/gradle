@@ -1,7 +1,7 @@
 package com.lagradost.cloudstream3.gradle
 
 import org.gradle.api.Project
-import com.lagradost.cloudstream3.gradle.entities.*
+import com.lagradost.cloudstream3.gradle.entities.PluginEntry
 import java.io.File
 import java.security.MessageDigest
 
@@ -29,6 +29,11 @@ fun Project.makePluginEntry(): PluginEntry {
 
     val repo = extension.repository
 
+    val cs3File = this.layout.buildDirectory.file("${this.name}.cs3").get().asFile
+    val jarFile = this.layout.buildDirectory.file("${this.name}.jar").get().asFile
+
+    val jarFileSize = jarFile.takeIf { it.exists() }?.length()
+
     return PluginEntry(
         url = (if (repo == null) "" else repo.getRawLink("${this.name}.cs3", extension.buildBranch)),
         status = extension.status,
@@ -42,12 +47,12 @@ fun Project.makePluginEntry(): PluginEntry {
         iconUrl = extension.iconUrl,
         apiVersion = extension.apiVersion,
         tvTypes = extension.tvTypes,
-        fileSize = extension.fileSize,
-        jarFileSize = extension.jarFileSize,
+        fileSize = cs3File.takeIf { it.exists() }?.length(),
+        jarFileSize = jarFileSize,
         jarUrl = (
-                if (repo == null || extension.jarFileSize == null) null else repo.getRawLink("${this.name}.jar", extension.buildBranch)
+                if (repo == null || jarFileSize == null) null else repo.getRawLink("${this.name}.jar", extension.buildBranch)
         ),
-        jarHash = extension.jarHash,
-        fileHash = extension.fileHash
+        jarHash = jarFile.takeIf { it.exists() }?.let { sha256(it) },
+        fileHash = cs3File.takeIf { it.exists() }?.let { sha256(it) }
     )
 }
