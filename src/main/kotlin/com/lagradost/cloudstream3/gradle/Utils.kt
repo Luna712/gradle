@@ -34,6 +34,9 @@ fun Project.makePluginEntry(): PluginEntry {
 
     val jarSize = jarFile.takeIf { it.exists() }?.length()
 
+    logger.lifecycle("CS3 path: ${cs3File.path} (exists=${cs3File.exists()})")
+    logger.lifecycle("JAR path: ${jarFile.path} (exists=${jarFile.exists()})")
+
     return PluginEntry(
         url = (if (repo == null) "" else repo.getRawLink("${this.name}.cs3", extension.buildBranch)),
         status = extension.status,
