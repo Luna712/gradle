@@ -58,9 +58,10 @@ fun registerTasks(project: Project) {
         val extension = project.extensions.getCloudstream()
         task.pluginClassName.set(extension.pluginClassName)
 
-        project.tasks.named("compileDebugKotlin", KotlinCompile::class.java).configure {
-            task.dependsOn(it)
-            task.input.from(it.destinationDirectory)
+        val kotlinTask = project.tasks.findByName("compileDebugKotlin") as? KotlinCompile
+        if (kotlinTask != null) {
+            task.dependsOn(kotlinTask)
+            task.input.from(kotlinTask.destinationDirectory)
         }
 
         task.doLast {
