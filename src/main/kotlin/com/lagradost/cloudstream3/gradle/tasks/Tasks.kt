@@ -32,6 +32,10 @@ fun registerTasks(project: Project) {
                     JsonBuilder(lst, JsonGenerator.Options().excludeNulls().build()).toPrettyString()
                 }
             )
+
+            task.notCompatibleWithConfigurationCache(
+                "Build uses dynamic task graph and runtime mutation of extension state"
+            )
         }
     }
 
@@ -117,6 +121,10 @@ fun registerTasks(project: Project) {
             extension.jarFileSize = task.jarFileSize.orNull
             extension.jarHash = task.jarHash.orNull
         }
+    }
+
+    compilePluginJar.configure { task ->
+        task.finalizedBy("ensureJarCompatibility")
     }
 
     project.tasks.register("ensureJarCompatibility", EnsureJarCompatibilityTask::class.java) { task ->
