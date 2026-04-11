@@ -22,6 +22,7 @@ fun registerTasks(project: Project) {
     if (project.rootProject.tasks.findByName("makePluginsJson") == null) {
         project.rootProject.tasks.register("makePluginsJson", MakePluginsJsonTask::class.java) { task ->
             task.group = TASK_GROUP
+            task.dependsOn("make")
             task.outputs.upToDateWhen { false }
             task.outputFile.set(task.project.layout.buildDirectory.file("plugins.json"))
             task.pluginEntriesJson.set(
@@ -212,10 +213,10 @@ fun registerTasks(project: Project) {
         }
     }
 
-    /*project.rootProject.tasks.named("makePluginsJson").configure { task ->
+    project.rootProject.tasks.named("makePluginsJson").configure { task ->
         task.dependsOn(make)
-    }*/
-    project.rootProject.tasks.getByName("makePluginsJson").dependsOn(make)
+    }
+    // project.rootProject.tasks.getByName("makePluginsJson").dependsOn(make)
 
     project.tasks.register("cleanCache", CleanCacheTask::class.java) { task ->
         task.group = TASK_GROUP
