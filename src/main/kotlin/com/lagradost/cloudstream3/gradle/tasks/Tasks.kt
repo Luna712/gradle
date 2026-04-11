@@ -212,9 +212,10 @@ fun registerTasks(project: Project) {
         }
     }
 
-    project.rootProject.tasks.named("makePluginsJson").configure { task ->
+    /*project.rootProject.tasks.named("makePluginsJson").configure { task ->
         task.dependsOn(make)
-    }
+    }*/
+    project.rootProject.tasks.getByName("makePluginsJson").dependsOn(make)
 
     project.tasks.register("cleanCache", CleanCacheTask::class.java) { task ->
         task.group = TASK_GROUP
