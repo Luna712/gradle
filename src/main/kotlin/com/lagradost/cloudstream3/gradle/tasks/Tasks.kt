@@ -59,8 +59,8 @@ fun registerTasks(project: Project) {
         task.pluginClassName.set(extension.pluginClassName)
 
         project.tasks.named("compileDebugKotlin", KotlinCompile::class.java).configure {
-            task.dependsOn(this)
-            task.input.from(destinationDirectory)
+            task.dependsOn(it)
+            task.input.from(it.destinationDirectory)
         }
 
         task.doLast {
@@ -124,7 +124,7 @@ fun registerTasks(project: Project) {
     }
 
     compilePluginJar.configure {
-        finalizedBy("ensureJarCompatibility")
+        it.finalizedBy("ensureJarCompatibility")
     }
 
     project.tasks.register("ensureJarCompatibility", EnsureJarCompatibilityTask::class.java) { task ->
@@ -192,7 +192,7 @@ fun registerTasks(project: Project) {
     }
 
     project.rootProject.tasks.named("makePluginsJson").configure {
-        dependsOn(make)
+        it.dependsOn(make)
     }
 
     project.tasks.register("cleanCache", CleanCacheTask::class.java) { task ->
