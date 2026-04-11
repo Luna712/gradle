@@ -28,7 +28,7 @@ fun registerTasks(project: Project) {
 
             task.entries.from(
                 pluginProjects.map {
-                    it.layout.buildDirectory.file("intermediates/pluginEntry.json")
+                    it.layout.buildDirectory.file("intermediates/pluginEntry-${it.name}.json")
                 }
             )
 
@@ -203,7 +203,7 @@ fun registerTasks(project: Project) {
         )
 
         task.outputFile.set(
-            project.layout.buildDirectory.file("intermediates/pluginEntry.json")
+            project.layout.buildDirectory.file("intermediates/pluginEntry-${project.name}.json")
         )
     }
 
