@@ -24,15 +24,15 @@ fun registerTasks(project: Project) {
             task.group = TASK_GROUP
             task.outputs.upToDateWhen { false }
             task.outputFile.set(task.project.layout.buildDirectory.file("plugins.json"))
-            /*task.pluginEntriesJson.set(
+            task.pluginEntriesJson.set(
                 task.project.provider {
                     val lst = task.project.allprojects.mapNotNull { sub ->
                         sub.extensions.findCloudstream()?.let { sub.makePluginEntry() }
                     }
                     JsonBuilder(lst, JsonGenerator.Options().excludeNulls().build()).toPrettyString()
                 }
-            ) */
-            task.pluginEntriesJson.set(
+            )
+            /*task.pluginEntriesJson.set(
                 task.project.provider {
                     task.project.allprojects.mapNotNull { sub ->
                         sub.extensions.findCloudstream() ?: return@mapNotNull null
@@ -51,7 +51,7 @@ fun registerTasks(project: Project) {
                         JsonBuilder(it, JsonGenerator.Options().excludeNulls().build()).toPrettyString()
                     }
                 }
-            )
+            )*/
 
             /*task.notCompatibleWithConfigurationCache(
                 "Build uses dynamic task graph and runtime mutation of extension state"
