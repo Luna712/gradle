@@ -19,51 +19,6 @@ fun registerTasks(project: Project) {
     val extension = project.extensions.getCloudstream()
     val intermediatesDir = project.layout.buildDirectory.dir("intermediates")
 
-    if (project.rootProject.tasks.findByName("makePluginsJson") == null) {
-        project.rootProject.tasks.register("makePluginsJson", MakePluginsJsonTask::class.java) { task ->
-            task.group = TASK_GROUP
-            task.dependsOn(
-                task.project.allprojects.mapNotNull { sub ->
-                    sub.tasks.findByName("make")
-                }
-            )
-            task.outputs.upToDateWhen { false }
-            task.outputFile.set(task.project.layout.buildDirectory.file("plugins.json"))
-            task.pluginEntriesJson.set(
-                task.project.provider {
-                    val lst = task.project.allprojects.mapNotNull { sub ->
-                        sub.extensions.findCloudstream()?.let { sub.makePluginEntry() }
-                    }
-                    JsonBuilder(lst, JsonGenerator.Options().excludeNulls().build()).toPrettyString()
-                }
-            )
-            /*task.pluginEntriesJson.set(
-                task.project.provider {
-                    task.project.allprojects.mapNotNull { sub ->
-                        sub.extensions.findCloudstream() ?: return@mapNotNull null
-
-                        val cs3File = sub.layout.buildDirectory.file("${sub.name}.cs3").get().asFile
-                        val jarFile = sub.layout.buildDirectory.file("${sub.name}.jar").get().asFile
-
-                        sub.makePluginEntry().copy(
-                            fileSize = cs3File.takeIf { it.exists() }?.length(),
-                            fileHash = cs3File.takeIf { it.exists() }?.let { sha256(it) },
-
-                            jarFileSize = jarFile.takeIf { it.exists() }?.length(),
-                            jarHash = jarFile.takeIf { it.exists() }?.let { sha256(it) }
-                        )
-                    }.let {
-                        JsonBuilder(it, JsonGenerator.Options().excludeNulls().build()).toPrettyString()
-                    }
-                }
-            )*/
-
-            /*task.notCompatibleWithConfigurationCache(
-                "Build uses dynamic task graph and runtime mutation of extension state"
-            )*/
-        }
-    }
-
     project.tasks.register("genSources", GenSourcesTask::class.java) { task ->
         task.group = TASK_GROUP
     }
@@ -144,8 +99,6 @@ fun registerTasks(project: Project) {
 
         task.doLast {
             extension.pluginClassName = task.pluginClassName.orNull
-            /* extension.jarFileSize = task.jarFileSize.orNull
-            extension.jarHash = task.jarHash.orNull */
         }
     }
 
@@ -211,13 +164,26 @@ fun registerTasks(project: Project) {
         task.destinationDirectory.set(project.layout.buildDirectory)
 
         task.doLast {
-            /* extension.fileSize = task.outputs.files.singleFile.length()
-            extension.fileHash = sha256(task.outputs.files.singleFile) */
             task.logger.lifecycle("Made CloudStream package at ${task.outputs.files.singleFile}")
         }
     }
 
-    // project.rootProject.tasks.getByName("makePluginsJson").dependsOn(make)
+    if (project.rootProject.tasks.findByName("makePluginsJson") == null) {
+        project.rootProject.tasks.register("makePluginsJson", MakePluginsJsonTask::class.java) { task ->
+            task.group = TASK_GROUP
+            task.dependsOn(make)
+            task.outputs.upToDateWhen { false }
+            task.outputFile.set(task.project.layout.buildDirectory.file("plugins.json"))
+            task.pluginEntriesJson.set(
+                task.project.provider {
+                    val lst = task.project.allprojects.mapNotNull { sub ->
+                        sub.extensions.findCloudstream()?.let { sub.makePluginEntry() }
+                    }
+                    JsonBuilder(lst, JsonGenerator.Options().excludeNulls().build()).toPrettyString()
+                }
+            )
+        }
+    }
 
     project.tasks.register("cleanCache", CleanCacheTask::class.java) { task ->
         task.group = TASK_GROUP
