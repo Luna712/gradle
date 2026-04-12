@@ -24,18 +24,6 @@ fun registerTasks(project: Project) {
             task.group = TASK_GROUP
             task.outputs.upToDateWhen { false }
             task.outputFile.set(task.project.layout.buildDirectory.file("plugins.json"))
-            task.pluginEntriesJson.set(
-                task.project.provider {
-                    val lst = task.project.allprojects.mapNotNull { sub ->
-                        sub.extensions.findCloudstream()?.let { sub.makePluginEntry() }
-                    }
-                    JsonBuilder(lst, JsonGenerator.Options().excludeNulls().build()).toPrettyString()
-                }
-            )
-
-            task.notCompatibleWithConfigurationCache(
-                "Dynamic data (fileHash, fileSize, etc...) does not get added to plugins.json with configuration cache."
-            )
         }
     }
 
@@ -169,6 +157,8 @@ fun registerTasks(project: Project) {
         task.requiresResources.set(extension.requiresResources)
     }
 
+    val pluginEntryFile = project.layout.buildDirectory.file("plugin-entry.json")
+
     val make = project.tasks.register("make", Zip::class.java) { task ->
         task.group = TASK_GROUP
         task.dependsOn(compileDex)
@@ -198,11 +188,17 @@ fun registerTasks(project: Project) {
             extension.fileSize = task.outputs.files.singleFile.length()
             extension.fileHash = sha256(task.outputs.files.singleFile)
             task.logger.lifecycle("Made CloudStream package at ${task.outputs.files.singleFile}")
+
+            val entry = project.makePluginEntry()
+            pluginEntryFile.get().asFile.writeText(
+                JsonBuilder(entry, JsonGenerator.Options().excludeNulls().build()).toPrettyString()
+            )
         }
     }
 
-    project.rootProject.tasks.named("makePluginsJson").configure { task ->
+    project.rootProject.tasks.named("makePluginsJson", MakePluginsJsonTask::class.java).configure { task ->
         task.dependsOn(make)
+        task.pluginEntryFiles.from(pluginEntryFile)
     }
 
     project.tasks.register("cleanCache", CleanCacheTask::class.java) { task ->
