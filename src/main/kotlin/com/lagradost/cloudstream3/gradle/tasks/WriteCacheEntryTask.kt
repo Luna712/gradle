@@ -17,12 +17,12 @@ abstract class WriteCacheEntryTask : DefaultTask() {
     @get:Input @get:Optional abstract val repoUrl: Property<String>
     @get:Input @get:Optional abstract val repoRawLink: Property<String>  // template: "{file}"
     @get:Input @get:Optional abstract val buildBranch: Property<String>
-    @get:Input @get:Optional abstract val status: Property<Int>
+    @get:Input abstract val status: Property<Int>
     @get:Input abstract val authors: ListProperty<String>
     @get:Input @get:Optional abstract val description: Property<String>
     @get:Input @get:Optional abstract val language: Property<String>
     @get:Input @get:Optional abstract val iconUrl: Property<String>
-    @get:Input @get:Optional abstract val apiVersion: Property<Int>
+    @get:Input abstract val apiVersion: Property<Int>
     @get:Input abstract val tvTypes: ListProperty<String>
     @get:Input @get:Optional abstract val isCrossPlatform: Property<Boolean>
 
@@ -42,7 +42,7 @@ abstract class WriteCacheEntryTask : DefaultTask() {
 
         val entry = PluginEntry(
             url = rawLink("${name}.cs3") ?: "",
-            status = status.orNull,
+            status = status,
             version = pluginVersion.get(),
             name = name,
             internalName = name,
@@ -51,7 +51,7 @@ abstract class WriteCacheEntryTask : DefaultTask() {
             repositoryUrl = repoUrl.orNull,
             language = language.orNull,
             iconUrl = iconUrl.orNull,
-            apiVersion = apiVersion.orNull,
+            apiVersion = apiVersion,
             tvTypes = tvTypes.get(),
             fileSize = cs3.length(),
             fileHash = sha256(cs3),
