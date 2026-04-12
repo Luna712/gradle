@@ -218,6 +218,8 @@ fun registerTasks(project: Project) {
         task.group = TASK_GROUP
         task.dependsOn(make)
         task.adbPath.set(LibraryExtensionCompat(project).adb.absolutePath)
-        task.pluginFile.set(make.map { it.outputs.files.singleFile })
+        task.pluginFile.set(project.layout.file(
+            make.map { it.outputs.files.singleFile }
+        ))
     }
 }
