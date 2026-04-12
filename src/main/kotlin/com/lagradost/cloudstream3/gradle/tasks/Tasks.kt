@@ -39,9 +39,8 @@ fun registerTasks(project: Project) {
         }
     }
 
-    project.tasks.register("genSources", GenSourcesTask::class.java) { task ->
+    project.tasks.register("generateSources", GenerateSourcesTask::class.java) { task ->
         task.group = TASK_GROUP
-
         val extension = project.extensions.getCloudstream()
         val apkinfoProvider = project.provider {
             extension.apkinfo ?: error("apkinfo not found")
