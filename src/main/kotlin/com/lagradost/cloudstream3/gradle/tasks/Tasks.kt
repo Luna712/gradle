@@ -118,8 +118,6 @@ fun registerTasks(project: Project) {
 
         task.doLast {
             extension.pluginClassName = task.pluginClassName.orNull
-            extension.jarFileSize = task.jarFileSize.orNull
-            extension.jarHash = task.jarHash.orNull
         }
     }
 
@@ -198,8 +196,8 @@ fun registerTasks(project: Project) {
         task.pluginVersion.set(project.provider {
             project.version.toString().toIntOrNull(10) ?: -1
         })
-        task.repoUrl.set(project.provider { repo?.url })
-        task.repoRawLink.set(project.provider { repo?.getRawLink("{file}", extension.buildBranch) })
+        task.repoUrl.set(project.provider { extension.repository?.url })
+        task.repoRawLink.set(project.provider { extension.repository?.getRawLink("{file}", extension.buildBranch) })
         task.buildBranch.set(project.provider { extension.buildBranch })
         task.status.set(project.provider { extension.status })
         task.authors.set(project.provider { extension.authors })
