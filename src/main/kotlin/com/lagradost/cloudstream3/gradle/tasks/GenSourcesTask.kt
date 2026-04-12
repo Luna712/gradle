@@ -4,7 +4,7 @@ import com.lagradost.cloudstream3.gradle.getCloudstream
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import java.util.function.Function
-import java.net.URL
+import java.net.URI
 import com.lagradost.cloudstream3.gradle.download
 import com.lagradost.cloudstream3.gradle.createProgressLogger
 
@@ -15,8 +15,7 @@ abstract class GenSourcesTask : DefaultTask() {
         val apkinfo = extension.apkinfo!!
 
         val sourcesJarFile = apkinfo.cache.resolve("cloudstream-sources.jar")
-
-        val url = URL("${apkinfo.urlPrefix}/app-sources.jar")
+        val url = URI("${apkinfo.urlPrefix}/app-sources.jar").toURL()
 
         url.download(sourcesJarFile, createProgressLogger(project, "Download sources"))
     }
