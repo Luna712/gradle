@@ -157,8 +157,6 @@ fun registerTasks(project: Project) {
         task.requiresResources.set(extension.requiresResources)
     }
 
-    val pluginEntryFile = project.layout.buildDirectory.file("plugin-entry.json")
-
     val make = project.tasks.register("make", Zip::class.java) { task ->
         task.group = TASK_GROUP
         task.dependsOn(compileDex)
@@ -185,19 +183,47 @@ fun registerTasks(project: Project) {
         task.destinationDirectory.set(project.layout.buildDirectory)
 
         task.doLast {
-            extension.fileSize = task.outputs.files.singleFile.length()
-            extension.fileHash = sha256(task.outputs.files.singleFile)
             task.logger.lifecycle("Made CloudStream package at ${task.outputs.files.singleFile}")
-
-            val entry = project.makePluginEntry()
-            pluginEntryFile.get().asFile.writeText(
-                JsonBuilder(entry, JsonGenerator.Options().excludeNulls().build()).toPrettyString()
-            )
         }
     }
 
-    project.rootProject.tasks.named("makePluginsJson", MakePluginsJsonTask::class.java).configure { task ->
+    val pluginEntryFile = project.layout.buildDirectory.file("plugin-entry.json")
+
+    val repo = extension.repository
+    val writeCacheEntry = project.tasks.register("writeCacheEntry", WriteCacheEntryTask::class.java) { task ->
+        task.group = TASK_GROUP
         task.dependsOn(make)
+        if (extension.isCrossPlatform) task.dependsOn(compilePluginJar)
+
+        task.pluginName.set(project.name)
+        task.pluginVersion.set(project.provider {
+            project.version.toString().toIntOrNull(10) ?: -1
+        })
+        task.repoUrl.set(repo?.url)
+        task.repoRawLink.set(repo?.let { r ->
+            project.provider { r.getRawLink("{file}", extension.buildBranch) }
+        })
+        task.buildBranch.set(project.provider { extension.buildBranch })
+        task.status.set(project.provider { extension.status })
+        task.authors.set(project.provider { extension.authors })
+        task.description.set(project.provider { extension.description })
+        task.language.set(project.provider { extension.language })
+        task.iconUrl.set(project.provider { extension.iconUrl })
+        task.apiVersion.set(project.provider { extension.apiVersion })
+        task.tvTypes.set(project.provider { extension.tvTypes })
+        task.isCrossPlatform.set(extension.isCrossPlatform)
+
+        task.cs3File.set(make.flatMap { zip ->
+            zip.outputs.files.let { project.layout.buildDirectory.file("${project.name}.cs3") }
+        })
+        if (extension.isCrossPlatform) {
+            task.jarFile.set(project.layout.buildDirectory.file("${project.name}.jar"))
+        }
+        task.outputFile.set(pluginEntryFile)
+    }
+
+    project.rootProject.tasks.named("makePluginsJson", MakePluginsJsonTask::class.java).configure { task ->
+        task.dependsOn(writeCacheEntry)
         task.pluginEntryFiles.from(pluginEntryFile)
     }
 
