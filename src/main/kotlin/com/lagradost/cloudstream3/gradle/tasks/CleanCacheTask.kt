@@ -13,6 +13,8 @@ abstract class CleanCacheTask : DefaultTask() {
     @TaskAction
     fun clean() {
         val file = jarFile.asFile.get()
-        if (file.exists()) file.delete()
+        if (file.exists()) file.delete() else {
+            logger.lifecycle("JAR file does not exist; nothing to clean.")
+        }
     }
 }
