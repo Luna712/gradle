@@ -1,5 +1,6 @@
 package com.lagradost.cloudstream3.gradle.tasks
 
+import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
@@ -27,7 +28,7 @@ abstract class MakePluginsJsonTask : DefaultTask() {
             .filter { it.exists() }
             .map { slurper.parse(it) }
 
-        val json = groovy.json.JsonBuilder(entries).toPrettyString()
+        val json = JsonBuilder(entries).toPrettyString()
         outputFile.asFile.get().writeText(json)
         logger.lifecycle("Created ${outputFile.asFile.get()}")
     }
