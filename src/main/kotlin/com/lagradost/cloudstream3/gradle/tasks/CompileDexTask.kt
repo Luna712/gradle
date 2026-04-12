@@ -82,7 +82,7 @@ abstract class CompileDexTask : DefaultTask() {
 
                     var detectedPluginClass: String? = null
                     for (file in files) {
-                        val reader = ClassReader(file.inputStream())
+                        val reader = ClassReader(file.readAllBytes())
 
                         val classNode = ClassNode()
                         reader.accept(classNode, 0)
