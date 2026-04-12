@@ -13,6 +13,7 @@ import se.vidstige.jadb.JadbDevice
 import se.vidstige.jadb.JadbException
 import se.vidstige.jadb.RemoteFile
 import se.vidstige.jadb.Subprocess
+import java.io.File
 import java.nio.charset.StandardCharsets
 
 abstract class DeployWithAdbTask : DefaultTask() {
