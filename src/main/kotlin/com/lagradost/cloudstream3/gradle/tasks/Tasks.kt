@@ -23,18 +23,141 @@ fun registerTasks(project: Project) {
         project.rootProject.tasks.register("makePluginsJson", MakePluginsJsonTask::class.java) { task ->
             task.group = TASK_GROUP
             task.outputs.upToDateWhen { false }
-            task.outputFile.set(task.project.layout.buildDirectory.file("plugins.json"))
-            task.pluginEntriesJson.set(
+
+            task.outputFile.set(
+                task.project.layout.buildDirectory.file("plugins.json")
+            )
+
+            task.names.set(
                 task.project.provider {
-                    val lst = task.project.allprojects.mapNotNull { sub ->
-                        sub.extensions.findCloudstream()?.let { sub.makePluginEntry() }
+                    task.project.allprojects.mapNotNull { sub ->
+                        sub.extensions.findCloudstream()?.name
                     }
-                    JsonBuilder(lst, JsonGenerator.Options().excludeNulls().build()).toPrettyString()
                 }
             )
 
-            task.notCompatibleWithConfigurationCache(
-                "Dynamic data (fileHash, fileSize, etc...) does not get added to plugins.json with configuration cache."
+            task.internalNames.set(
+                task.project.provider {
+                    task.project.allprojects.mapNotNull { sub ->
+                        sub.extensions.findCloudstream()?.internalName
+                    }
+                }
+            )
+
+            task.urls.set(
+                task.project.provider {
+                    task.project.allprojects.mapNotNull { sub ->
+                        sub.extensions.findCloudstream()?.let { sub.makePluginEntry().url }
+                    }
+                }
+            )
+
+            task.statuses.set(
+                task.project.provider {
+                    task.project.allprojects.mapNotNull { sub ->
+                        sub.extensions.findCloudstream()?.let { sub.makePluginEntry().status }
+                    }
+                }
+            )
+
+            task.versions.set(
+                task.project.provider {
+                    task.project.allprojects.mapNotNull { sub ->
+                        sub.extensions.findCloudstream()?.let { sub.makePluginEntry().version }
+                    }
+                }
+            )
+
+            task.authors.set(
+                task.project.provider {
+                    task.project.allprojects.mapNotNull { sub ->
+                        sub.extensions.findCloudstream()?.authors
+                    }
+                }
+            )
+
+            task.descriptions.set(
+                task.project.provider {
+                    task.project.allprojects.mapNotNull { sub ->
+                        sub.extensions.findCloudstream()?.description
+                    }
+                }
+            )
+
+            task.repositoryUrls.set(
+                task.project.provider {
+                    task.project.allprojects.mapNotNull { sub ->
+                        sub.extensions.findCloudstream()?.repositoryUrl
+                    }
+                }
+            )
+
+            task.languages.set(
+                task.project.provider {
+                    task.project.allprojects.mapNotNull { sub ->
+                        sub.extensions.findCloudstream()?.language
+                    }
+                }
+            )
+
+            task.iconUrls.set(
+                task.project.provider {
+                    task.project.allprojects.mapNotNull { sub ->
+                        sub.extensions.findCloudstream()?.iconUrl
+                    }
+                }
+            )
+
+            task.apiVersions.set(
+                task.project.provider {
+                    task.project.allprojects.mapNotNull { sub ->
+                        sub.extensions.findCloudstream()?.apiVersion
+                    }
+                }
+            )
+
+            task.tvTypes.set(
+                task.project.provider {
+                    task.project.allprojects.mapNotNull { sub ->
+                        sub.extensions.findCloudstream()?.tvTypes
+                    }
+                }
+            )
+
+            task.fileSizes.set(
+                task.project.provider {
+                    task.project.allprojects.mapNotNull { sub ->
+                        sub.extensions.findCloudstream()?.fileSize
+                    }
+                }
+            )
+
+            task.jarFileSizes.set(
+                task.project.provider {
+                    task.project.allprojects.mapNotNull { sub ->
+                        sub.extensions.findCloudstream()?.jarFileSize
+                    }
+                }
+            )
+
+            task.jarUrls.set(
+                task.project.provider {
+                    task.project.allprojects.mapNotNull { sub ->
+                        sub.extensions.findCloudstream()?.jarUrl
+                    }
+                }
+            )
+
+            task.jarHashes.set(
+                task.project.provider {
+                    sub.extensions.findCloudstream()?.jarHash
+                }
+            )
+
+            task.fileHashes.set(
+                task.project.provider {
+                    sub.extensions.findCloudstream()?.fileHash
+                }
             )
         }
     }
