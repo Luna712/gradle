@@ -2,11 +2,7 @@ package com.lagradost.cloudstream3.gradle.tasks
 
 import com.android.build.gradle.tasks.ProcessLibraryManifest
 import com.lagradost.cloudstream3.gradle.LibraryExtensionCompat
-import com.lagradost.cloudstream3.gradle.findCloudstream
 import com.lagradost.cloudstream3.gradle.getCloudstream
-import com.lagradost.cloudstream3.gradle.sha256
-import groovy.json.JsonBuilder
-import groovy.json.JsonGenerator
 import org.gradle.api.Project
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.internal.os.OperatingSystem
@@ -113,8 +109,6 @@ fun registerTasks(project: Project) {
         task.pluginClassName.set(extension.pluginClassName)
         task.jarInputFile.fileProvider(jarTask.map { it.outputs.files.singleFile })
         task.targetJarFile.set(project.layout.buildDirectory.file("${project.name}.jar"))
-        task.jarFileSize.set(extension.jarFileSize)
-        task.jarHash.set(extension.jarHash)
 
         task.doLast {
             extension.pluginClassName = task.pluginClassName.orNull
@@ -186,7 +180,6 @@ fun registerTasks(project: Project) {
 
     val pluginEntryFile = project.layout.buildDirectory.file("plugin-entry.json")
 
-    val repo = extension.repository
     val writeCacheEntry = project.tasks.register("writeCacheEntry", WriteCacheEntryTask::class.java) { task ->
         task.group = TASK_GROUP
         task.dependsOn(make)
