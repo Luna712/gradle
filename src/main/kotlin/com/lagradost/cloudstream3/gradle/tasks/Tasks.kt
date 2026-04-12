@@ -189,7 +189,7 @@ fun registerTasks(project: Project) {
         task.doLast {
             extension.fileSize = task.outputs.files.singleFile.length()
             extension.fileHash = sha256(task.outputs.files.singleFile)
-            task.logger.lifecycle("Made Cloudstream package at ${task.outputs.files.singleFile}")
+            task.logger.lifecycle("Made CloudStream package at ${task.outputs.files.singleFile}")
         }
     }
 
