@@ -78,8 +78,6 @@ abstract class CloudstreamExtension @Inject constructor(project: Project) {
         setRepo(split[0], split[1], type)
     }
 
-    internal var pluginClassName: String? = null
-
     var requiresResources = false
     var description: String? = null
     var authors = listOf<String>()

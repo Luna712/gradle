@@ -5,7 +5,6 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
@@ -17,9 +16,6 @@ abstract class CompilePluginJarTask : DefaultTask() {
     @get:InputFile
     abstract val pluginClassFile: RegularFileProperty
 
-    @get:Internal
-    abstract val pluginClassName: Property<String?>
-
     @get:InputFile
     abstract val jarInputFile: RegularFileProperty
 
@@ -28,13 +24,6 @@ abstract class CompilePluginJarTask : DefaultTask() {
 
     @TaskAction
     fun compileJar() {
-        if (pluginClassName.orNull == null) {
-            val file = pluginClassFile.get().asFile
-            if (file.exists()) {
-                pluginClassName.set(file.readText())
-            }
-        }
-
         if (!hasCrossPlatformSupport.get()) return
 
         val jarFile = jarInputFile.get().asFile

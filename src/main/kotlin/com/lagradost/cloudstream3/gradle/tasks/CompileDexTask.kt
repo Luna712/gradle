@@ -33,9 +33,6 @@ abstract class CompileDexTask : DefaultTask() {
     @get:OutputFile
     abstract val pluginClassFile: RegularFileProperty
 
-    @get:Internal
-	abstract val pluginClassName: Property<String?>
-
     @get:Input
 	abstract val minSdk: Property<Int>
 
@@ -83,24 +80,31 @@ abstract class CompileDexTask : DefaultTask() {
                         null,
                     )
 
+                    var detectedPluginClass: String? = null
                     for (file in files) {
-                        val reader = ClassReader(file.readAllBytes())
+                        val reader = ClassReader(file.inputStream())
 
                         val classNode = ClassNode()
                         reader.accept(classNode, 0)
 
                         for (annotation in classNode.visibleAnnotations.orEmpty() + classNode.invisibleAnnotations.orEmpty()) {
                             if (annotation.desc == "Lcom/lagradost/cloudstream3/plugins/CloudstreamPlugin;") {
-                                require(pluginClassName.orNull == null) {
+                                require(detectedPluginClass == null) {
                                     "Only 1 active plugin class per project is supported"
                                 }
 
-                                val detectedName = classNode.name.replace('/', '.')
-                                pluginClassFile.asFile.orNull?.writeText(detectedName)
-                                pluginClassName.set(detectedName)
+                                detectedPluginClass = classNode.name.replace('/', '.')
                             }
                         }
                     }
+
+                    val output = pluginClassFile.get().asFile
+                    require(detectedPluginClass != null) {
+                        "No plugin class annotated with @CloudstreamPlugin was found"
+                    }
+
+                    output.parentFile.mkdirs()
+                    output.writeText(detectedPluginClass)
                 }
         }
 

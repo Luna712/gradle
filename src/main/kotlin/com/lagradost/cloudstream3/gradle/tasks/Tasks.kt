@@ -49,17 +49,10 @@ fun registerTasks(project: Project) {
         task.minSdk.set(android.minSdk)
         task.bootClasspath.from(android.bootClasspath)
 
-        val extension = project.extensions.getCloudstream()
-        task.pluginClassName.set(extension.pluginClassName)
-
         val kotlinTask = project.tasks.findByName("compileDebugKotlin") as KotlinCompile?
         if (kotlinTask != null) {
             task.dependsOn(kotlinTask)
             task.input.from(kotlinTask.destinationDirectory)
-        }
-
-        task.doLast {
-            extension.pluginClassName = task.pluginClassName.orNull
         }
     }
 
@@ -106,13 +99,8 @@ fun registerTasks(project: Project) {
 
         task.hasCrossPlatformSupport.set(extension.isCrossPlatform)
         task.pluginClassFile.set(pluginClassFile)
-        task.pluginClassName.set(extension.pluginClassName)
         task.jarInputFile.fileProvider(jarTask.map { it.outputs.files.singleFile })
         task.targetJarFile.set(project.layout.buildDirectory.file("${project.name}.jar"))
-
-        task.doLast {
-            extension.pluginClassName = task.pluginClassName.orNull
-        }
     }
 
     project.tasks.register("ensureJarCompatibility", EnsureJarCompatibilityTask::class.java) { task ->
