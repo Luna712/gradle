@@ -41,6 +41,21 @@ fun registerTasks(project: Project) {
 
     project.tasks.register("genSources", GenSourcesTask::class.java) { task ->
         task.group = TASK_GROUP
+
+        val extension = project.extensions.getCloudstream()
+        val apkinfoProvider = project.provider {
+            extension.apkinfo ?: error("apkinfo not found")
+        }
+
+        task.urlPrefix.set(apkinfoProvider.map { it.urlPrefix })
+        task.sourcesJarFile.set(
+            project.layout.file(
+                project.provider {
+                    val apkinfo = apkinfoProvider.get()
+                    apkinfo.cache.resolve("cloudstream-sources.jar")
+                }
+            )
+        )
     }
 
     val pluginClassFile = intermediatesDir.map { it.file("pluginClass") }
