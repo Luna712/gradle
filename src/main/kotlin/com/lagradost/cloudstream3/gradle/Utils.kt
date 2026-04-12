@@ -19,22 +19,22 @@ fun sha256(file: File): String {
     return "sha256-" + digest.digest().joinToString("") { "%02x".format(it) }
 }
 
-fun Project.makePluginEntry(): PluginEntry {
-    val extension = this.extensions.getCloudstream()
-
-    val version = this.version.toString().toIntOrNull(10)
-    if (version == null) {
-        logger.warn("'${project.version}' is not a valid version. Use an integer.")
-    }
-
+fun makePluginEntry(
+    name: String,
+    version: Int?,
+    fileSize: Long?,
+    fileHash: String?,
+    jarFileSize: Long?,
+    jarHash: String?,
+    extension: CloudstreamExtension,
+): PluginEntry {
     val repo = extension.repository
-
     return PluginEntry(
-        url = (if (repo == null) "" else repo.getRawLink("${this.name}.cs3", extension.buildBranch)),
+        url = (if (repo == null) "" else repo.getRawLink("${name}.cs3", extension.buildBranch)),
         status = extension.status,
         version = version ?: -1,
-        name = this.name,
-        internalName = this.name,
+        name = name,
+        internalName = name,
         authors = extension.authors,
         description = extension.description,
         repositoryUrl = repo?.url,
@@ -42,12 +42,11 @@ fun Project.makePluginEntry(): PluginEntry {
         iconUrl = extension.iconUrl,
         apiVersion = extension.apiVersion,
         tvTypes = extension.tvTypes,
-        fileSize = extension.fileSize,
-        jarFileSize = extension.jarFileSize,
-        jarUrl = (
-                if (repo == null || extension.jarFileSize == null) null else repo.getRawLink("${this.name}.jar", extension.buildBranch)
-        ),
-        jarHash = extension.jarHash,
-        fileHash = extension.fileHash
+        fileSize = fileSize,
+        jarFileSize = jarFileSize,
+        jarUrl = (if (repo == null || jarFileSize == null) null
+                  else repo.getRawLink("${name}.jar", extension.buildBranch)),
+        jarHash = jarHash,
+        fileHash = fileHash
     )
 }
