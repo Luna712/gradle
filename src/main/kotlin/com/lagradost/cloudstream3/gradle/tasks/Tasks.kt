@@ -34,20 +34,20 @@ fun registerTasks(project: Project) {
 	task.basePluginEntries.set(plugins)
 
 	task.jarFiles.set(
-		project.provider {
-			project.allprojects.mapNotNull { sub ->
-				sub.extensions.findCloudstream()?.jarFile
-			}
+	project.provider {
+		project.allprojects.map { sub ->
+			sub.layout.buildDirectory.file("${sub.name}.jar")
 		}
-	)
+	}
+)
 
-	task.cs3Files.set(
-		project.provider {
-			project.allprojects.mapNotNull { sub ->
-				sub.extensions.findCloudstream()?.cs3File
-			}
+task.cs3Files.set(
+	project.provider {
+		project.allprojects.map { sub ->
+			sub.layout.buildDirectory.file("${sub.name}.cs3")
 		}
-	)
+	}
+)
 }
 
     project.tasks.register("generateSources", GenerateSourcesTask::class.java) { task ->
