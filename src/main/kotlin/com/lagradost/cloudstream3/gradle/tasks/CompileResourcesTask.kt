@@ -2,6 +2,7 @@ package com.lagradost.cloudstream3.gradle.tasks
 
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.IgnoreEmptyDirectories
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
