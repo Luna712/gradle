@@ -43,7 +43,6 @@ abstract class DeployWithAdbTask : DefaultTask() {
 
         val file: File = pluginFile.get().asFile
         val path = "/storage/emulated/0/Cloudstream3/plugins/"
-
         val device = devices[0]
         device.push(file, RemoteFile(path + file.name))
 
@@ -52,7 +51,6 @@ abstract class DeployWithAdbTask : DefaultTask() {
         device.executeShell("chmod", "-w", path + file.name)
         val args = arrayListOf("start", "-a", "android.intent.action.VIEW", "-d", "cloudstreamapp:")
         if (waitForDebugger) args.add("-D")
-
         val response = String(
             device.executeShell("am", *args.toTypedArray()).readAllBytes(), StandardCharsets.UTF_8
         )
