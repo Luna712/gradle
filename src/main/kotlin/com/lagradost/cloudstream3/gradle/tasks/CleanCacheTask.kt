@@ -7,8 +7,7 @@ import org.gradle.api.tasks.TaskAction
 
 abstract class CleanCacheTask : DefaultTask() {
 
-    @get:Internal
-    abstract val jarFile: RegularFileProperty
+    @get:Internal abstract val jarFile: RegularFileProperty
 
     @TaskAction
     fun clean() {
