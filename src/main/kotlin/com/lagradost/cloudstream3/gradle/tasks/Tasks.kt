@@ -49,7 +49,6 @@ fun registerTasks(project: Project) {
 		}
 	}
 )
-	}
 
 task.cs3Files.set(
 	project.provider {
@@ -67,6 +66,7 @@ task.cs3Files.set(
 	}
 )
 }
+	}
 
     project.tasks.register("generateSources", GenerateSourcesTask::class.java) { task ->
         task.group = TASK_GROUP
