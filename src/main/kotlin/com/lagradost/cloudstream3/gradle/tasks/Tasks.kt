@@ -4,7 +4,6 @@ import com.android.build.gradle.tasks.ProcessLibraryManifest
 import com.lagradost.cloudstream3.gradle.LibraryExtensionCompat
 import com.lagradost.cloudstream3.gradle.findCloudstream
 import com.lagradost.cloudstream3.gradle.getCloudstream
-import com.lagradost.cloudstream3.gradle.makePluginEntry
 import com.lagradost.cloudstream3.gradle.sha256
 import groovy.json.JsonBuilder
 import groovy.json.JsonGenerator
