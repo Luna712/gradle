@@ -1,0 +1,67 @@
+package com.lagradost.cloudstream3.gradle.tasks
+
+import com.lagradost.cloudstream3.gradle.entities.PluginEntry
+import com.lagradost.cloudstream3.gradle.makePluginEntry
+import groovy.json.JsonBuilder
+import groovy.json.JsonGenerator
+import org.gradle.api.DefaultTask
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.*
+
+abstract class WriteCacheEntryTask : DefaultTask() {
+
+    @get:Input abstract val pluginName: Property<String>
+    @get:Input abstract val pluginVersion: Property<Int>
+    @get:Input @get:Optional abstract val repoUrl: Property<String>
+    @get:Input @get:Optional abstract val repoRawLink: Property<String>  // template: "{file}"
+    @get:Input @get:Optional abstract val buildBranch: Property<String>
+    @get:Input @get:Optional abstract val status: Property<Int>
+    @get:Input abstract val authors: ListProperty<String>
+    @get:Input @get:Optional abstract val description: Property<String>
+    @get:Input @get:Optional abstract val language: Property<String>
+    @get:Input @get:Optional abstract val iconUrl: Property<String>
+    @get:Input @get:Optional abstract val apiVersion: Property<Int>
+    @get:Input abstract val tvTypes: ListProperty<String>
+    @get:Input @get:Optional abstract val isCrossPlatform: Property<Boolean>
+
+    @get:InputFile abstract val cs3File: RegularFileProperty
+    @get:InputFile @get:Optional abstract val jarFile: RegularFileProperty
+
+    @get:OutputFile abstract val outputFile: RegularFileProperty
+
+    @TaskAction
+    fun write() {
+        val cs3 = cs3File.asFile.get()
+        val jar = jarFile.asFile.orNull?.takeIf { it.exists() }
+
+        val name = pluginName.get()
+        val rawTemplate = repoRawLink.orNull
+        fun rawLink(file: String) = rawTemplate?.replace("{file}", file)
+
+        val entry = PluginEntry(
+            url = rawLink("${name}.cs3") ?: "",
+            status = status.orNull,
+            version = pluginVersion.get(),
+            name = name,
+            internalName = name,
+            authors = authors.get(),
+            description = description.orNull,
+            repositoryUrl = repoUrl.orNull,
+            language = language.orNull,
+            iconUrl = iconUrl.orNull,
+            apiVersion = apiVersion.orNull,
+            tvTypes = tvTypes.get(),
+            fileSize = cs3.length(),
+            fileHash = sha256(cs3),
+            jarFileSize = jar?.length(),
+            jarUrl = jar?.let { rawLink("${name}.jar") },
+            jarHash = jar?.let { sha256(it) },
+        )
+
+        outputFile.asFile.get().writeText(
+            JsonBuilder(entry, JsonGenerator.Options().excludeNulls().build()).toPrettyString()
+        )
+    }
+}
