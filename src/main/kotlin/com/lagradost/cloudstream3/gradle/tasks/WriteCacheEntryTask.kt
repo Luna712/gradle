@@ -1,14 +1,19 @@
 package com.lagradost.cloudstream3.gradle.tasks
 
 import com.lagradost.cloudstream3.gradle.entities.PluginEntry
-import com.lagradost.cloudstream3.gradle.sha256
 import groovy.json.JsonBuilder
 import groovy.json.JsonGenerator
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.TaskAction
+import java.io.File
+import java.security.MessageDigest
 
 abstract class WriteCacheEntryTask : DefaultTask() {
 
@@ -62,5 +67,19 @@ abstract class WriteCacheEntryTask : DefaultTask() {
         outputFile.asFile.get().writeText(
             JsonBuilder(entry, JsonGenerator.Options().excludeNulls().build()).toPrettyString()
         )
+    }
+
+    private fun sha256(file: File): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        file.inputStream().use { fis ->
+            val buffer = ByteArray(8192)
+            var read = fis.read(buffer)
+            while (read != -1) {
+                digest.update(buffer, 0, read)
+                read = fis.read(buffer)
+            }
+        }
+
+        return "sha256-" + digest.digest().joinToString("") { "%02x".format(it) }
     }
 }

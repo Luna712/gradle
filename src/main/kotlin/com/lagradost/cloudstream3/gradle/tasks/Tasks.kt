@@ -2,11 +2,7 @@ package com.lagradost.cloudstream3.gradle.tasks
 
 import com.android.build.gradle.tasks.ProcessLibraryManifest
 import com.lagradost.cloudstream3.gradle.LibraryExtensionCompat
-import com.lagradost.cloudstream3.gradle.findCloudstream
 import com.lagradost.cloudstream3.gradle.getCloudstream
-import com.lagradost.cloudstream3.gradle.sha256
-import groovy.json.JsonBuilder
-import groovy.json.JsonGenerator
 import org.gradle.api.Project
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.internal.os.OperatingSystem
@@ -53,17 +49,10 @@ fun registerTasks(project: Project) {
         task.minSdk.set(android.minSdk)
         task.bootClasspath.from(android.bootClasspath)
 
-        val extension = project.extensions.getCloudstream()
-        task.pluginClassName.set(extension.pluginClassName)
-
         val kotlinTask = project.tasks.findByName("compileDebugKotlin") as KotlinCompile?
         if (kotlinTask != null) {
             task.dependsOn(kotlinTask)
             task.input.from(kotlinTask.destinationDirectory)
-        }
-
-        task.doLast {
-            extension.pluginClassName = task.pluginClassName.orNull
         }
     }
 
@@ -110,17 +99,8 @@ fun registerTasks(project: Project) {
 
         task.hasCrossPlatformSupport.set(extension.isCrossPlatform)
         task.pluginClassFile.set(pluginClassFile)
-        task.pluginClassName.set(extension.pluginClassName)
         task.jarInputFile.fileProvider(jarTask.map { it.outputs.files.singleFile })
         task.targetJarFile.set(project.layout.buildDirectory.file("${project.name}.jar"))
-        task.jarFileSize.set(extension.jarFileSize)
-        task.jarHash.set(extension.jarHash)
-
-        task.doLast {
-            extension.pluginClassName = task.pluginClassName.orNull
-            extension.jarFileSize = task.jarFileSize.orNull
-            extension.jarHash = task.jarHash.orNull
-        }
     }
 
     project.tasks.register("ensureJarCompatibility", EnsureJarCompatibilityTask::class.java) { task ->
@@ -188,7 +168,6 @@ fun registerTasks(project: Project) {
 
     val pluginEntryFile = project.layout.buildDirectory.file("plugin-entry.json")
 
-    val repo = extension.repository
     val writeCacheEntry = project.tasks.register("writeCacheEntry", WriteCacheEntryTask::class.java) { task ->
         task.group = TASK_GROUP
         task.dependsOn(make)
@@ -198,8 +177,8 @@ fun registerTasks(project: Project) {
         task.pluginVersion.set(project.provider {
             project.version.toString().toIntOrNull(10) ?: -1
         })
-        task.repoUrl.set(project.provider { repo?.url })
-        task.repoRawLink.set(project.provider { repo?.getRawLink("{file}", extension.buildBranch) })
+        task.repoUrl.set(project.provider { extension.repository?.url })
+        task.repoRawLink.set(project.provider { extension.repository?.getRawLink("{file}", extension.buildBranch) })
         task.buildBranch.set(project.provider { extension.buildBranch })
         task.status.set(project.provider { extension.status })
         task.authors.set(project.provider { extension.authors })
