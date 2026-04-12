@@ -21,14 +21,14 @@ fun registerTasks(project: Project) {
 
     if (project.rootProject.tasks.findByName("makePluginsJson") == null) {
         project.rootProject.tasks.register("makePluginsJson", MakePluginsJsonTask::class.java) { task ->
+            val lst = task.project.subprojects.mapNotNull { sub ->
+                sub.extensions.findCloudstream()?.let { sub.makePluginEntry() }
+            }
             task.group = TASK_GROUP
             task.outputs.upToDateWhen { false }
             task.outputFile.set(task.project.layout.buildDirectory.file("plugins.json"))
             task.pluginEntriesJson.set(
-                project.provider {
-                    val lst = task.project.subprojects.mapNotNull { sub ->
-                        sub.extensions.findCloudstream()?.let { sub.makePluginEntry() }
-                    }
+                project.providers.provider {
                     JsonBuilder(lst, JsonGenerator.Options().excludeNulls().build()).toPrettyString()
                 }
             )
