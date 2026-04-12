@@ -47,12 +47,10 @@ fun registerTasks(project: Project) {
         }
 
         task.urlPrefix.set(apkinfoProvider.map { it.urlPrefix })
-        task.sourcesJarFile.set(
-            project.layout.file(
-                project.provider {
-                    apkinfoProvider.get().cache.resolve("cloudstream-sources.jar")
-                }
-            )
+        task.sourcesJarFile.set(project.layout.file(
+            project.provider {
+                apkinfoProvider.get().cache.resolve("cloudstream-sources.jar")
+            })
         )
     }
 
@@ -214,11 +212,9 @@ fun registerTasks(project: Project) {
             extension.apkinfo ?: error("apkinfo not found")
         }
 
-        task.jarFile.set(
-            project.provider {
-                apkinfoProvider.get().jarFile
-            }
-        )
+        task.jarFile.set(project.layout.file(
+            apkinfoProvider.map { it.jarFile }
+        ))
     }
 
     project.tasks.register("deployWithAdb", DeployWithAdbTask::class.java) { task ->
