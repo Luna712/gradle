@@ -1,6 +1,5 @@
 package com.lagradost.cloudstream3.gradle.tasks
 
-import com.lagradost.cloudstream3.gradle.sha256
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
@@ -20,12 +19,6 @@ abstract class CompilePluginJarTask : DefaultTask() {
 
     @get:Internal
     abstract val pluginClassName: Property<String?>
-
-    @get:Internal
-	abstract val jarFileSize: Property<Long?>
-
-    @get:Internal
-	abstract val jarHash: Property<String?>
 
     @get:InputFile
     abstract val jarInputFile: RegularFileProperty
@@ -48,9 +41,6 @@ abstract class CompilePluginJarTask : DefaultTask() {
         val targetFile = targetJarFile.get().asFile
 
         jarFile.copyTo(targetFile, overwrite = true)
-        jarFileSize.set(jarFile.length())
-
-        jarHash.set(sha256(jarFile))
-        logger.lifecycle("Made Cloudstream cross-platform package at ${targetFile.absolutePath}")
+        logger.lifecycle("Made CloudStream cross-platform package at ${targetFile.absolutePath}")
     }
 }
