@@ -13,6 +13,7 @@ import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 
 abstract class MakePluginsJsonTask : DefaultTask() {
+
     @get:OutputFile
     abstract val outputFile: RegularFileProperty
 
