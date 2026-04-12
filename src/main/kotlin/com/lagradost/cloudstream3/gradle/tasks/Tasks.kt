@@ -34,7 +34,7 @@ fun registerTasks(project: Project) {
             )
 
             task.notCompatibleWithConfigurationCache(
-                "Dynamic data (hash, fileSize, etc...) does not get added to plugins.json with configuration cache."
+                "Dynamic data (fileHash, fileSize, etc...) does not get added to plugins.json with configuration cache."
             )
         }
     }
