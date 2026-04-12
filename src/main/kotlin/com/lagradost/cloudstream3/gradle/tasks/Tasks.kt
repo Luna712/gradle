@@ -198,7 +198,7 @@ fun registerTasks(project: Project) {
     }
 
     project.rootProject.tasks.named("makePluginsJson", MakePluginsJsonTask::class.java).configure { task ->
-        task.mustRunAfter(writeCacheEntry)
+        task.dependsOn(writeCacheEntry)
         task.pluginEntryFiles.from(pluginEntryFile)
     }
 
