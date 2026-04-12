@@ -217,5 +217,7 @@ fun registerTasks(project: Project) {
     project.tasks.register("deployWithAdb", DeployWithAdbTask::class.java) { task ->
         task.group = TASK_GROUP
         task.dependsOn(make)
+        task.adbPath.set(LibraryExtensionCompat(project).adb.absolutePath)
+        task.pluginFile.set(make.outputs.files.singleFile)
     }
 }
