@@ -25,16 +25,12 @@ fun registerTasks(project: Project) {
             task.outputs.upToDateWhen { false }
             task.outputFile.set(task.project.layout.buildDirectory.file("plugins.json"))
             task.pluginEntriesJson.set(
-                task.project.provider {
-                    val lst = task.project.allprojects.mapNotNull { sub ->
+                project.provider {
+                    val lst = project.subprojects.mapNotNull { sub ->
                         sub.extensions.findCloudstream()?.let { sub.makePluginEntry() }
                     }
                     JsonBuilder(lst, JsonGenerator.Options().excludeNulls().build()).toPrettyString()
                 }
-            )
-
-            task.notCompatibleWithConfigurationCache(
-                "Dynamic data (fileHash, fileSize, etc...) does not get added to plugins.json with configuration cache."
             )
         }
     }
