@@ -3,7 +3,6 @@ package com.lagradost.cloudstream3.gradle.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.AbstractCopyTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.TaskAction
@@ -14,7 +13,6 @@ import se.vidstige.jadb.JadbDevice
 import se.vidstige.jadb.JadbException
 import se.vidstige.jadb.RemoteFile
 import se.vidstige.jadb.Subprocess
-import java.io.File
 import java.nio.charset.StandardCharsets
 
 abstract class DeployWithAdbTask : DefaultTask() {
