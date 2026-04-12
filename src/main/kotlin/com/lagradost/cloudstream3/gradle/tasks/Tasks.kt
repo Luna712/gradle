@@ -35,16 +35,32 @@ fun registerTasks(project: Project) {
 
 	task.jarFiles.set(
 	project.provider {
-		project.allprojects.map { sub ->
-			sub.layout.buildDirectory.file("${sub.name}.jar")
+		project.allprojects.mapNotNull { sub ->
+			val file = sub.layout.buildDirectory.file("${sub.name}.jar").get().asFile
+
+			if (file.exists()) {
+				project.logger.lifecycle("JAR exists: ${file.absolutePath}")
+				file
+			} else {
+				project.logger.lifecycle("JAR missing (filtered): ${file.absolutePath}")
+				null
+			}
 		}
 	}
 )
 
 task.cs3Files.set(
 	project.provider {
-		project.allprojects.map { sub ->
-			sub.layout.buildDirectory.file("${sub.name}.cs3")
+		project.allprojects.mapNotNull { sub ->
+			val file = sub.layout.buildDirectory.file("${sub.name}.cs3").get().asFile
+
+			if (file.exists()) {
+				project.logger.lifecycle("CS3 exists: ${file.absolutePath}")
+				file
+			} else {
+				project.logger.lifecycle("CS3 missing (filtered): ${file.absolutePath}")
+				null
+			}
 		}
 	}
 )
