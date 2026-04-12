@@ -19,12 +19,11 @@ abstract class WriteCacheEntryTask : DefaultTask() {
     @get:Input @get:Optional abstract val buildBranch: Property<String>
     @get:Input abstract val status: Property<Int>
     @get:Input abstract val authors: ListProperty<String>
-    @get:Input @get:Optional abstract val description: Property<String>
+    @get:Input @get:Optional abstract val pluginDescription: Property<String>
     @get:Input @get:Optional abstract val language: Property<String>
     @get:Input @get:Optional abstract val iconUrl: Property<String>
     @get:Input abstract val apiVersion: Property<Int>
     @get:Input abstract val tvTypes: ListProperty<String>
-    @get:Input @get:Optional abstract val isCrossPlatform: Property<Boolean>
 
     @get:InputFile abstract val cs3File: RegularFileProperty
     @get:InputFile @get:Optional abstract val jarFile: RegularFileProperty
@@ -47,7 +46,7 @@ abstract class WriteCacheEntryTask : DefaultTask() {
             name = name,
             internalName = name,
             authors = authors.get(),
-            description = description.orNull,
+            description = pluginDescription.orNull,
             repositoryUrl = repoUrl.orNull,
             language = language.orNull,
             iconUrl = iconUrl.orNull,
