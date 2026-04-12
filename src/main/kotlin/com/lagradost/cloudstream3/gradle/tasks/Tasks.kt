@@ -198,10 +198,8 @@ fun registerTasks(project: Project) {
         task.pluginVersion.set(project.provider {
             project.version.toString().toIntOrNull(10) ?: -1
         })
-        task.repoUrl.set(repo?.url)
-        task.repoRawLink.set(repo?.let { r ->
-            project.provider { r.getRawLink("{file}", extension.buildBranch) }
-        })
+        task.repoUrl.set(project.provider { repo?.url })
+        task.repoRawLink.set(project.provider { repo?.getRawLink("{file}", extension.buildBranch) })
         task.buildBranch.set(project.provider { extension.buildBranch })
         task.status.set(project.provider { extension.status })
         task.authors.set(project.provider { extension.authors })
