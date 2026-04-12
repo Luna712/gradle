@@ -19,6 +19,7 @@ fun registerTasks(project: Project) {
     val extension = project.extensions.getCloudstream()
     val intermediatesDir = project.layout.buildDirectory.dir("intermediates")
 
+	if (project.rootProject.tasks.findByName("makePluginsJson") == null) {
     project.rootProject.tasks.register("makePluginsJson", MakePluginsJsonTask::class.java) { task ->
 	task.group = TASK_GROUP
 	task.outputs.upToDateWhen { false }
@@ -48,6 +49,7 @@ fun registerTasks(project: Project) {
 		}
 	}
 )
+	}
 
 task.cs3Files.set(
 	project.provider {
