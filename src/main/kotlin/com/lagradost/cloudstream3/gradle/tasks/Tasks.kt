@@ -209,6 +209,11 @@ fun registerTasks(project: Project) {
 
     project.tasks.register("cleanCache", CleanCacheTask::class.java) { task ->
         task.group = TASK_GROUP
+        val extension = project.extensions.getCloudstream()
+        val apkinfoProvider = project.provider {
+            extension.apkinfo ?: error("apkinfo not found")
+        }
+        task.jarFile.set(apkinfoProvider.map { it.jarFile })
     }
 
     project.tasks.register("deployWithAdb", DeployWithAdbTask::class.java) { task ->
