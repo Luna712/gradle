@@ -79,11 +79,6 @@ abstract class CloudstreamExtension @Inject constructor(project: Project) {
     }
 
     internal var pluginClassName: String? = null
-    internal var fileSize: Long? = null
-    internal var fileHash: String? = null
-
-    internal var jarFileSize: Long? = null
-    internal var jarHash: String? = null
 
     var requiresResources = false
     var description: String? = null
@@ -116,8 +111,4 @@ class Repo(val user: String, val repo: String, val url: String, val rawLinkForma
 
 fun ExtensionContainer.getCloudstream(): CloudstreamExtension {
     return getByName("cloudstream") as CloudstreamExtension
-}
-
-fun ExtensionContainer.findCloudstream(): CloudstreamExtension? {
-    return findByName("cloudstream") as CloudstreamExtension?
 }
