@@ -2,6 +2,7 @@ package com.lagradost.cloudstream3.gradle.tasks
 
 import com.lagradost.cloudstream3.gradle.entities.PluginEntry
 import com.lagradost.cloudstream3.gradle.makePluginEntry
+import com.lagradost.cloudstream3.gradle.sha256
 import groovy.json.JsonBuilder
 import groovy.json.JsonGenerator
 import org.gradle.api.DefaultTask
