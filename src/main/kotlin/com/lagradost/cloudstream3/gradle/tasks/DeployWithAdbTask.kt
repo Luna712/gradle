@@ -2,6 +2,7 @@ package com.lagradost.cloudstream3.gradle.tasks
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.AbstractCopyTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
@@ -22,15 +23,12 @@ abstract class DeployWithAdbTask : DefaultTask() {
     @set:Option(option = "wait-for-debugger", description = "Enables debugging flag when starting the discord activity")
     var waitForDebugger: Boolean = false
 
-    @get:Input
-    abstract var adbPath: String
-
-    @get:InputFile
-    abstract val pluginFile: RegularFileProperty
+    @get:Input abstract var adbPath: Property<String>
+    @get:InputFile abstract val pluginFile: RegularFileProperty
 
     @TaskAction
     fun deployWithAdb() {
-        AdbServerLauncher(Subprocess(), adbPath).launch()
+        AdbServerLauncher(Subprocess(), adbPath.get()).launch()
         val jadbConnection = JadbConnection()
         val devices = jadbConnection.devices.filter {
             try {
@@ -44,11 +42,10 @@ abstract class DeployWithAdbTask : DefaultTask() {
             "Only one ADB device should be connected, but ${devices.size} were!"
         }
 
-        val device = devices[0]
-
         val file: File = pluginFile.get().asFile
         val path = "/storage/emulated/0/Cloudstream3/plugins/"
 
+        val device = devices[0]
         device.push(file, RemoteFile(path + file.name))
 
         // Make the file readonly to work on newer android versions, this does not impact adb push.
