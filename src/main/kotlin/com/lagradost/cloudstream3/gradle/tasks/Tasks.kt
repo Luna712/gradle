@@ -51,8 +51,7 @@ fun registerTasks(project: Project) {
         task.sourcesJarFile.set(
             project.layout.file(
                 project.provider {
-                    val apkinfo = apkinfoProvider.get()
-                    apkinfo.cache.resolve("cloudstream-sources.jar")
+                    apkinfoProvider.get().cache.resolve("cloudstream-sources.jar")
                 }
             )
         )
