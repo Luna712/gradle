@@ -11,7 +11,7 @@ import org.gradle.internal.logging.progress.ProgressLoggerFactory
 import java.net.URI
 import javax.inject.Inject
 
-abstract class GenSourcesTask : DefaultTask() {
+abstract class GenerateSourcesTask : DefaultTask() {
 
     @get:Inject
     abstract val progressLoggerFactory: ProgressLoggerFactory
@@ -23,7 +23,7 @@ abstract class GenSourcesTask : DefaultTask() {
     abstract val sourcesJarFile: RegularFileProperty
 
     @TaskAction
-    fun genSources() {
+    fun generate() {
         val logger = progressLoggerFactory
             .newOperation("Download sources")
             .also { it.description = "Download sources" }
