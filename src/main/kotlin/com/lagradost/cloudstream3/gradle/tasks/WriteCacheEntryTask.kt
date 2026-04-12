@@ -42,7 +42,7 @@ abstract class WriteCacheEntryTask : DefaultTask() {
 
         val entry = PluginEntry(
             url = rawLink("${name}.cs3") ?: "",
-            status = status,
+            status = status.get(),
             version = pluginVersion.get(),
             name = name,
             internalName = name,
@@ -51,7 +51,7 @@ abstract class WriteCacheEntryTask : DefaultTask() {
             repositoryUrl = repoUrl.orNull,
             language = language.orNull,
             iconUrl = iconUrl.orNull,
-            apiVersion = apiVersion,
+            apiVersion = apiVersion.get(),
             tvTypes = tvTypes.get(),
             fileSize = cs3.length(),
             fileHash = sha256(cs3),
