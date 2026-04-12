@@ -23,71 +23,36 @@ abstract class MakePluginsJsonTask : DefaultTask() {
 	abstract val urls: ListProperty<String>
 
 	@get:Input
-	abstract val statuses: ListProperty<String>
-
-	@get:Input
 	abstract val versions: ListProperty<Int>
 
 	@get:Input
-	abstract val authors: ListProperty<String>
+	abstract val jarFiles: ListProperty<java.io.File>
 
 	@get:Input
-	abstract val descriptions: ListProperty<String>
+	abstract val cs3Files: ListProperty<java.io.File>
 
 	@get:Input
-	abstract val repositoryUrls: ListProperty<String?>
-
-	@get:Input
-	abstract val languages: ListProperty<String>
-
-	@get:Input
-	abstract val iconUrls: ListProperty<String?>
-
-	@get:Input
-	abstract val apiVersions: ListProperty<Int>
-
-	@get:Input
-	abstract val tvTypes: ListProperty<String>
-
-	@get:Input
-	abstract val fileSizes: ListProperty<Long>
-
-	@get:Input
-	abstract val jarFileSizes: ListProperty<Long?>
-
-	@get:Input
-	abstract val jarUrls: ListProperty<String?>
-
-	@get:Input
-	abstract val jarHashes: ListProperty<String?>
-
-	@get:Input
-	abstract val fileHashes: ListProperty<String?>
+	abstract val basePluginEntries: ListProperty<PluginEntry>
 
 	@get:OutputFile
 	abstract val outputFile: RegularFileProperty
 
 	@TaskAction
 	fun makePluginsJson() {
+
 		val plugins = names.get().indices.map { i ->
-			PluginEntry(
-				name = names.get()[i],
-				internalName = internalNames.get()[i],
-				url = urls.get()[i],
-				status = statuses.get()[i],
-				version = versions.get()[i],
-				authors = authors.get()[i],
-				description = descriptions.get()[i],
-				repositoryUrl = repositoryUrls.get()[i],
-				language = languages.get()[i],
-				iconUrl = iconUrls.get()[i],
-				apiVersion = apiVersions.get()[i],
-				tvTypes = tvTypes.get()[i],
-				fileSize = fileSizes.get()[i],
-				jarFileSize = jarFileSizes.get()[i],
-				jarUrl = jarUrls.get()[i],
-				jarHash = jarHashes.get()[i],
-				fileHash = fileHashes.get()[i]
+
+			val base = basePluginEntries.get()[i]
+
+			val jarFile = jarFiles.get()[i]
+			val cs3File = cs3Files.get()[i]
+
+			base.copy(
+				fileSize = cs3File.length(),
+				jarFileSize = jarFile.length(),
+				fileHash = sha256(cs3File),
+				jarHash = sha256(jarFile),
+				jarUrl = base.jarUrl
 			)
 		}
 
