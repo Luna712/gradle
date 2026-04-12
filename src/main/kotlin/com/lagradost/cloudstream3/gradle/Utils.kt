@@ -1,7 +1,7 @@
 package com.lagradost.cloudstream3.gradle
 
 import org.gradle.api.Project
-import com.lagradost.cloudstream3.gradle.entities.*
+import com.lagradost.cloudstream3.gradle.entities.PluginEntry
 import java.io.File
 import java.security.MessageDigest
 
