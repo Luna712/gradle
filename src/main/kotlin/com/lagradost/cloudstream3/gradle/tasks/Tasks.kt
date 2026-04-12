@@ -205,12 +205,11 @@ fun registerTasks(project: Project) {
         task.buildBranch.set(project.provider { extension.buildBranch })
         task.status.set(project.provider { extension.status })
         task.authors.set(project.provider { extension.authors })
-        task.description.set(project.provider { extension.description })
+        task.pluginDescription.set(project.provider { extension.description })
         task.language.set(project.provider { extension.language })
         task.iconUrl.set(project.provider { extension.iconUrl })
         task.apiVersion.set(project.provider { extension.apiVersion })
         task.tvTypes.set(project.provider { extension.tvTypes })
-        task.isCrossPlatform.set(extension.isCrossPlatform)
 
         task.cs3File.set(make.flatMap { zip ->
             zip.outputs.files.let { project.layout.buildDirectory.file("${project.name}.cs3") }
