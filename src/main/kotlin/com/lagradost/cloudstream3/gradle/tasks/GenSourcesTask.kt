@@ -1,29 +1,37 @@
 package com.lagradost.cloudstream3.gradle.tasks
 
-import java.net.URI
+import com.lagradost.cloudstream3.gradle.download
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
-import com.lagradost.cloudstream3.gradle.download
-import com.lagradost.cloudstream3.gradle.createProgressLogger
+import org.gradle.internal.logging.progress.ProgressLoggerFactory
+import java.net.URI
+import javax.inject.Inject
 
 abstract class GenSourcesTask : DefaultTask() {
 
-	@get:Input
-	abstract val urlPrefix: Property<String>
+    @get:Inject
+    abstract val progressLoggerFactory: ProgressLoggerFactory
 
-	@get:OutputFile
-	abstract val sourcesJarFile: RegularFileProperty
+    @get:Input
+    abstract val urlPrefix: Property<String>
 
-	@TaskAction
-	fun genSources() {
-		val url = URI("${urlPrefix.get()}/app-sources.jar").toURL()
-		url.download(
-			sourcesJarFile.get().asFile,
-			createProgressLogger(project, "Download sources")
-		)
-	}
+    @get:OutputFile
+    abstract val sourcesJarFile: RegularFileProperty
+
+    @TaskAction
+    fun genSources() {
+        val logger = progressLoggerFactory
+            .newOperation("Download sources")
+            .also { it.description = "Download sources" }
+
+        val url = URI("${urlPrefix.get()}/app-sources.jar").toURL()
+        url.download(
+            sourcesJarFile.get().asFile,
+            logger
+        )
+    }
 }
