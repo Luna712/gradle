@@ -29,6 +29,12 @@ fun Project.makePluginEntry(): PluginEntry {
 
     val repo = extension.repository
 
+    val cs3File = this.layout.buildDirectory.file("${this.name}.cs3").get().asFile
+    val jarFile = this.layout.buildDirectory.file("${this.name}.jar").get().asFile
+
+    logger.lifecycle("CS3 path: ${cs3File.path} (exists=${cs3File.exists()})")
+    logger.lifecycle("JAR path: ${jarFile.path} (exists=${jarFile.exists()})")
+
     return PluginEntry(
         url = (if (repo == null) "" else repo.getRawLink("${this.name}.cs3", extension.buildBranch)),
         status = extension.status,
