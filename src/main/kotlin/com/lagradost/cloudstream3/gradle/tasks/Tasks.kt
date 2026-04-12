@@ -213,7 +213,12 @@ fun registerTasks(project: Project) {
         val apkinfoProvider = project.provider {
             extension.apkinfo ?: error("apkinfo not found")
         }
-        task.jarFile.set(apkinfoProvider.map { it.jarFile })
+
+        task.jarFile.set(
+            project.provider {
+                apkinfoProvider.get().jarFile
+            }
+        )
     }
 
     project.tasks.register("deployWithAdb", DeployWithAdbTask::class.java) { task ->
