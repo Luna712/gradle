@@ -128,7 +128,7 @@ fun registerTasks(project: Project) {
             project.provider {
                 project.version.toString().toIntOrNull(10).also { v ->
                     if (v == null) project.logger.warn(
-                        "'${project.version}' is not a valid version. Use an integer."
+                        "'${project.version}' is not a valid version in ${project.name}. Use an integer."
                     )
                 } ?: -1
             }
