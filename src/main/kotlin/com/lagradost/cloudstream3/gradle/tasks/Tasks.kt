@@ -5,8 +5,8 @@ import com.lagradost.cloudstream3.gradle.LibraryExtensionCompat
 import com.lagradost.cloudstream3.gradle.getCloudstream
 import org.gradle.api.Project
 import org.gradle.api.tasks.bundling.Zip
-import org.gradle.api.tasks.compile.AbstractCompile
 import org.gradle.internal.os.OperatingSystem
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 const val TASK_GROUP = "cloudstream"
 
@@ -49,7 +49,7 @@ fun registerTasks(project: Project) {
         task.minSdk.set(android.minSdk)
         task.bootClasspath.from(android.bootClasspath)
 
-        val kotlinTask = project.tasks.findByName("compileDebugKotlin") as? AbstractCompile
+        val kotlinTask = project.tasks.findByName("compileDebugKotlin") as? KotlinCompile
         if (kotlinTask != null) {
             task.dependsOn(kotlinTask)
             task.input.from(kotlinTask.destinationDirectory)
