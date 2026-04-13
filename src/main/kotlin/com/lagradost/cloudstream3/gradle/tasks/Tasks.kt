@@ -185,7 +185,7 @@ fun registerTasks(project: Project) {
         task.language.set(project.provider { extension.language })
         task.iconUrl.set(project.provider { extension.iconUrl })
         task.apiVersion.set(project.provider { extension.apiVersion })
-        task.tvTypes.set(project.provider { extension.tvTypes ?: emptyList() })
+        task.tvTypes.set(project.provider { extension.tvTypes })
 
         task.cs3File.set(make.flatMap { zip ->
             zip.outputs.files.let { project.layout.buildDirectory.file("${project.name}.cs3") }
