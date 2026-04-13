@@ -1,5 +1,6 @@
 package com.lagradost.cloudstream3.gradle
 
+import org.gradle.internal.logging.progress.ProgressLogger
 import java.io.File
 import java.io.FileOutputStream
 import java.net.URL
