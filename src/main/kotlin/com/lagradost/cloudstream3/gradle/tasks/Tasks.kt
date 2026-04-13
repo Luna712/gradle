@@ -49,7 +49,7 @@ fun registerTasks(project: Project) {
         task.minSdk.set(android.minSdk)
         task.bootClasspath.from(android.bootClasspath)
 
-        val kotlinTask = project.tasks.findByName("compileDebugKotlin") as KotlinCompile?
+        val kotlinTask = project.tasks.findByName("compileDebugKotlin") as? KotlinCompile
         if (kotlinTask != null) {
             task.dependsOn(kotlinTask)
             task.input.from(kotlinTask.destinationDirectory)
