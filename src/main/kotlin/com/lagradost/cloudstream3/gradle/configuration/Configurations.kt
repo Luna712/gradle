@@ -4,7 +4,7 @@ import org.gradle.api.Project
 
 fun registerConfigurations(project: Project) {
     val providers = arrayOf(
-        project.objects.newInstance(CloudStreamConfigurationProvider::class.java)
+        project.objects.newInstance(CloudstreamConfigurationProvider::class.java)
     )
 
     for (provider in providers) {
