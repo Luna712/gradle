@@ -23,21 +23,16 @@ abstract class CloudstreamConfigurationProvider : IConfigurationProvider {
             extension.apkinfo = ApkInfo(extension, dependency.version ?: "pre-release")
         }
 
-        val apkinfo = extension.apkinfo!!
+        val apkinfo = extension.apkinfo
         apkinfo.cache.mkdirs()
         if (!apkinfo.jarFile.exists()) {
             project.logger.lifecycle("Fetching JAR: ${apkinfo.jarFile.name}")
-            val url = URI("${apkinfo.urlPrefix}/classes.jar").toURL()
-            val progressLogger = progressLoggerFactory.newOperation("Download JAR").apply {
-                description = "Download JAR"
-            }
+            val logger = progressLoggerFactory
+                .newOperation("Download JAR")
+                .apply { description = "Download JAR" }
 
-            try {
-                progressLogger.started()
-                url.download(apkinfo.jarFile, progressLogger)
-            } finally {
-                progressLogger.completed()
-            }
+            val url = URI("${apkinfo.urlPrefix}/classes.jar").toURL()
+            url.download(apkinfo.jarFile, logger)
         }
 
         project.dependencies.add("compileOnly", project.files(apkinfo.jarFile))
