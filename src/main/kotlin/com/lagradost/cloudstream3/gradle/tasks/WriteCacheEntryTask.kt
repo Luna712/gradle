@@ -28,7 +28,7 @@ abstract class WriteCacheEntryTask : DefaultTask() {
     @get:Input abstract val language: Property<String?>
     @get:Input abstract val iconUrl: Property<String?>
     @get:Input abstract val apiVersion: Property<Int>
-    @get:Input abstract val tvTypes: ListProperty<String?>
+    @get:Input abstract val tvTypes: ListProperty<String>
 
     @get:InputFile abstract val cs3File: RegularFileProperty
     @get:InputFile @get:Optional abstract val jarFile: RegularFileProperty
@@ -56,7 +56,7 @@ abstract class WriteCacheEntryTask : DefaultTask() {
             language = language.get(),
             iconUrl = iconUrl.get(),
             apiVersion = apiVersion.get(),
-            tvTypes = tvTypes.get(),
+            tvTypes = tvTypes.get().takeIf { it.isNotEmpty() },
             fileSize = cs3.length(),
             fileHash = sha256(cs3),
             jarFileSize = jar?.length(),
