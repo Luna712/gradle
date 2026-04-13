@@ -107,5 +107,5 @@ class Repo(val user: String, val repo: String, val url: String, val rawLinkForma
 }
 
 fun ExtensionContainer.getCloudstream(): CloudstreamExtension {
-    return getByName<CloudstreamExtension>("cloudstream")
+    return getByName("cloudstream") as CloudstreamExtension
 }
