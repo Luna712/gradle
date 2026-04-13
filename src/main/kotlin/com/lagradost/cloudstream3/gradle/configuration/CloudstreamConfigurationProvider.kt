@@ -9,7 +9,7 @@ import org.gradle.internal.logging.progress.ProgressLoggerFactory
 import java.net.URI
 import javax.inject.Inject
 
-abstract class CloudStreamConfigurationProvider : IConfigurationProvider {
+abstract class CloudstreamConfigurationProvider : IConfigurationProvider {
 
     override val name: String
         get() = "cloudstream"
