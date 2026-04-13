@@ -9,7 +9,8 @@ fun Project.cloudstream(configuration: CloudstreamExtension.() -> Unit) =
     extensions.getCloudstream().configuration()
 
 fun Project.android(configuration: LibraryExtension.() -> Unit) {
-    extensions.getByName<LibraryExtension>("android").apply {
+    val android = extensions.getByName("android") as LibraryExtension
+    android.apply {
         project.extensions.findByType(JavaPluginExtension::class.java)?.apply {
             toolchain {
                 languageVersion.set(JavaLanguageVersion.of(17))
