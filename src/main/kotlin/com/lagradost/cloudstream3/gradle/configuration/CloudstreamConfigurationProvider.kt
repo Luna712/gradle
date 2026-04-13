@@ -23,7 +23,7 @@ abstract class CloudstreamConfigurationProvider : IConfigurationProvider {
             extension.apkinfo = ApkInfo(extension, dependency.version ?: "pre-release")
         }
 
-        val apkinfo = extension.apkinfo
+        val apkinfo = extension.apkinfo!!
         apkinfo.cache.mkdirs()
         if (!apkinfo.jarFile.exists()) {
             project.logger.lifecycle("Fetching JAR: ${apkinfo.jarFile.name}")
