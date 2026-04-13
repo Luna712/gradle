@@ -3,6 +3,7 @@ package com.lagradost.cloudstream3.gradle.configuration
 import org.gradle.api.Project
 
 fun registerConfigurations(project: Project) {
+
     val providers = arrayOf(
         project.objects.newInstance(CloudstreamConfigurationProvider::class.java)
     )
