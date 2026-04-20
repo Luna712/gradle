@@ -25,7 +25,11 @@ fun registerTasks(project: Project) {
     project.tasks.register("generateSources", GenerateSourcesTask::class.java) { task ->
         task.group = TASK_GROUP
         val apkinfoProvider = project.provider {
-            extension.apkinfo ?: error("apkinfo not found")
+            extension.apkinfo ?: error(
+                "Task 'generateSources' requires APK info to be configured, " +
+                "but none was found. If this project does not use cloudstream.jar, " +
+                "this task does not apply."
+            )
         }
 
         task.urlPrefix.set(apkinfoProvider.map { it.urlPrefix })
@@ -204,7 +208,10 @@ fun registerTasks(project: Project) {
     project.tasks.register("cleanCache", CleanCacheTask::class.java) { task ->
         task.group = TASK_GROUP
         val apkinfoProvider = project.provider {
-            extension.apkinfo ?: error("apkinfo not found")
+            extension.apkinfo ?: error(
+                "Cannot clean cache: no cached APK info found. " +
+                "This task only applies to projects that depend on cloudstream.jar."
+            )
         }
 
         task.jarFile.set(project.layout.file(
