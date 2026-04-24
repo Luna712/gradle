@@ -4,6 +4,7 @@ import com.android.build.gradle.tasks.ProcessLibraryManifest
 import com.lagradost.cloudstream3.gradle.LibraryExtensionCompat
 import com.lagradost.cloudstream3.gradle.getCloudstream
 import org.gradle.api.Project
+import org.gradle.api.tasks.Delete
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -19,6 +20,13 @@ fun registerTasks(project: Project) {
             task.group = TASK_GROUP
             task.outputs.upToDateWhen { false }
             task.outputFile.set(task.project.layout.buildDirectory.file("plugins.json"))
+        }
+    }
+
+    if (project.rootProject.tasks.findByName("clean") == null) {
+        project.rootProject.tasks.register("clean", Delete::class.java) { task ->
+            task.group = TASK_GROUP
+            task.delete(task.project.layout.buildDirectory)
         }
     }
 
@@ -106,16 +114,17 @@ fun registerTasks(project: Project) {
         task.targetJarFile.set(project.layout.buildDirectory.file("${project.name}.jar"))
     }
 
-    project.tasks.register("ensureJarCompatibility", EnsureJarCompatibilityTask::class.java) { task ->
-        task.dependsOn(compilePluginJar)
-        task.hasCrossPlatformSupport.set(extension.isCrossPlatform)
-        if (extension.isCrossPlatform) {
-            task.jarFile.set(project.layout.buildDirectory.file("${project.name}.jar"))
-            task.doLast {
-                task.checkOutput()
+    val ensureJarCompatibility =
+        project.tasks.register("ensureJarCompatibility", EnsureJarCompatibilityTask::class.java) { task ->
+            task.dependsOn(compilePluginJar)
+            task.hasCrossPlatformSupport.set(extension.isCrossPlatform)
+            if (extension.isCrossPlatform) {
+                task.jarFile.set(project.layout.buildDirectory.file("${project.name}.jar"))
+                task.doLast {
+                    task.checkOutput()
+                }
             }
         }
-    }
 
     val manifestFile = intermediatesDir.map { it.file("manifest.json") }
 
@@ -202,6 +211,7 @@ fun registerTasks(project: Project) {
 
     project.rootProject.tasks.named("makePluginsJson", MakePluginsJsonTask::class.java).configure { task ->
         task.dependsOn(writeCacheEntry)
+        task.mustRunAfter(ensureJarCompatibility)
         task.pluginEntryFiles.from(pluginEntryFile)
     }
 
